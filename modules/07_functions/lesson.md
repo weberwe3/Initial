@@ -212,4 +212,6 @@ This idea powers `sorted(..., key=...)` in Module 11 and decorators in Module 15
 - Variables inside a function are local to it.
 - Split big problems into small single-purpose functions.
 
+**Continue reading:** [Defining Your Own Python Function](https://realpython.com/defining-your-own-python-function/) (Real Python). Arguments, defaults, *args/**kwargs, return values and docstrings in depth.
+
 **Next:** [Module 08: Errors & debugging](../08_errors_debugging/lesson.md)

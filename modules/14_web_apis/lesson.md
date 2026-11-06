@@ -190,4 +190,6 @@ they run offline.
 - Keys go in environment variables, never in code.
 - Keep network code separate from processing code so it's testable.
 
+**Continue reading:** [Quickstart](https://requests.readthedocs.io/en/latest/user/quickstart/) (the Requests documentation). Parameters, headers, JSON, timeouts and errors for real API calls.
+
 **Next:** [Module 15: Intermediate power tools](../15_power_tools/lesson.md)

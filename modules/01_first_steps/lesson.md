@@ -197,4 +197,6 @@ Then run `python check.py 1`.
 - `int`, `float`, `str`, `bool` are the basic types; convert with `int()`, `float()`, `str()`.
 - `//` and `%` give the whole part and the remainder of a division.
 
+**Continue reading:** [An Informal Introduction to Python](https://docs.python.org/3/tutorial/introduction.html) (the official Python tutorial). Numbers, text and your first program, in the words of the people who make Python.
+
 **Next:** [Module 02: Strings](../02_strings/lesson.md)

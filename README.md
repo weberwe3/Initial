@@ -106,6 +106,32 @@ that matches what *you* want Python for (see below).
 
 ---
 
+## Continue reading
+
+One hand-picked, free resource per module for going deeper. The same link
+appears at the end of each lesson.
+
+| # | Module | Read next |
+|---|--------|-----------|
+| 00 | Setup | [How to Install Python on Your System](https://realpython.com/installing-python/) · Real Python |
+| 01 | First Steps | [An Informal Introduction to Python](https://docs.python.org/3/tutorial/introduction.html) · the official Python tutorial |
+| 02 | Strings (Working with Text) | [Strings and Character Data in Python](https://realpython.com/python-strings/) · Real Python |
+| 03 | Decisions | [More Control Flow Tools](https://docs.python.org/3/tutorial/controlflow.html) · the official Python tutorial |
+| 04 | Loops | [Iterations](https://www.py4e.com/html3/05-iterations) · Python for Everybody, chapter 5 |
+| 05 | Lists & Tuples | [Data Structures](https://docs.python.org/3/tutorial/datastructures.html) · the official Python tutorial |
+| 06 | Dictionaries & Sets | [Dictionaries in Python](https://realpython.com/python-dicts/) · Real Python |
+| 07 | Functions | [Defining Your Own Python Function](https://realpython.com/defining-your-own-python-function/) · Real Python |
+| 08 | Errors & Debugging | [Errors and Exceptions](https://docs.python.org/3/tutorial/errors.html) · the official Python tutorial |
+| 09 | Files & Data | [Reading and Writing Files](https://automatetheboringstuff.com/3e/chapter10.html) · Automate the Boring Stuff with Python, 3rd ed., chapter 10 |
+| 10 | Modules, Packages & pip | [Virtual Environments and Packages](https://docs.python.org/3/tutorial/venv.html) · the official Python tutorial |
+| 11 | Pythonic Code | [Python List Comprehension: Tutorial With Examples](https://realpython.com/list-comprehension-python/) · Real Python |
+| 12 | Classes & Objects | [Classes](https://docs.python.org/3/tutorial/classes.html) · the official Python tutorial |
+| 13 | Testing | [Get Started](https://docs.pytest.org/en/stable/getting-started.html) · the pytest documentation |
+| 14 | Working with the Web | [Quickstart](https://requests.readthedocs.io/en/latest/user/quickstart/) · the Requests documentation |
+| 15 | Intermediate Power Tools | [Primer on Python Decorators](https://realpython.com/primer-on-python-decorators/) · Real Python |
+
+---
+
 ## Choose your track
 
 The fundamentals are the same for everyone, but the capstone and the "stretch"

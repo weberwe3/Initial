@@ -212,4 +212,6 @@ for category, total in totals_by_category(expenses).items():
 - `json.load` / `json.dump` to save and load Python data.
 - `glob` / `rglob` to find files; dry-run before moving anything.
 
+**Continue reading:** [Reading and Writing Files](https://automatetheboringstuff.com/3e/chapter10.html) (Automate the Boring Stuff with Python, 3rd ed., chapter 10). Paths, files and saving data, from the classic free book on practical automation.
+
 **Next:** [Module 10: Modules, packages & pip](../10_modules_packages/lesson.md)

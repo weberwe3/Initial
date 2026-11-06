@@ -168,6 +168,8 @@ job - mine    # {'aws'}                     in job but not mine (difference)
 - Real data is usually a **list of dicts**.
 - `set` removes duplicates and answers "is X in here?" fast.
 
+**Continue reading:** [Dictionaries in Python](https://realpython.com/python-dicts/) (Real Python). A deep dive into creating, querying and transforming dictionaries.
+
 **Checkpoint:** you've finished Part 1. Do
 [Project 1](../../projects/01_first_programs.md) before moving on.
 

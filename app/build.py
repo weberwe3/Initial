@@ -69,12 +69,13 @@ def split_lesson(md: str):
     if current_title is not None:
         chunks.append({"title": current_title, "md": "\n".join(current).strip().strip("-").strip()})
     intro_md = "\n".join(intro).strip().strip("-").strip()
-    goal = re.search(r"\*\*Goal:\*\*\s*(.*)", intro_md)
+    goal = re.search(r"\*\*Goal:\*\*\s*(.*?)\s*(?=\n\*\*Time:|\Z)", intro_md, re.S)
     time = re.search(r"\*\*Time:\*\*\s*(.*)", intro_md)
-    rest = re.sub(r"\*\*(Goal|Time):\*\*.*\n?", "", intro_md).strip()
+    rest = re.sub(r"\*\*Goal:\*\*.*?(?=\n\*\*Time:|\Z)", "", intro_md, flags=re.S)
+    rest = re.sub(r"\*\*Time:\*\*.*\n?", "", rest).strip()
     return {
         "title": title,
-        "goal": goal.group(1).strip() if goal else "",
+        "goal": " ".join(goal.group(1).split()) if goal else "",
         "time": time.group(1).strip() if time else "",
         "intro": rest,
         "sections": [c for c in chunks if c["md"]],
@@ -106,6 +107,10 @@ def gather():
         mid = folder.name[:2]
         lesson = split_lesson((folder / "lesson.md").read_text(encoding="utf-8"))
         entry = {"id": mid, "slug": folder.name, **lesson, "learn": M.get(mid, {})}
+        cr = re.search(r"^\*\*Continue reading:\*\* \[([^\]]+)\]\((https?://[^)]+)\) \(([^)]+)\)\.\s*(.*)$",
+                       (folder / "lesson.md").read_text(encoding="utf-8"), re.M)
+        if cr:
+            entry["read"] = {"title": cr.group(1), "url": cr.group(2), "source": cr.group(3), "why": cr.group(4).strip()}
         if (folder / "exercises.py").exists():
             entry["exercise"] = {
                 "code": (folder / "exercises.py").read_text(encoding="utf-8"),

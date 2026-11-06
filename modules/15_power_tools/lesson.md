@@ -244,5 +244,7 @@ logging.warning("Disk almost full")
 - **Context managers** (`with`) guarantee cleanup; build them with `@contextmanager`.
 - **Type hints** document intent and let tools catch bugs.
 
+**Continue reading:** [Primer on Python Decorators](https://realpython.com/primer-on-python-decorators/) (Real Python). Decorators from first principles to decorators with arguments, with many real examples.
+
 **You've finished the lessons!** Time for the
 [Capstone project](../../projects/03_capstone.md).

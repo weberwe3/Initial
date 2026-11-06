@@ -801,6 +801,7 @@ function buildIndex() {
   MODS.forEach(m => {
     add({ kind: "Lesson", title: m.title, where: `Module ${m.id}`, text: strip(m.goal + " " + m.intro + " " + (m.learn.big_idea || "")), route: `m-${m.id}`, go: { mid: m.id, stage: "lesson", step: 0 } });
     m.sections.forEach((s, i) => add({ kind: "Lesson", title: s.title.replace(/`/g, ""), where: `Module ${m.id} · ${m.title}`, text: strip(s.md), route: `m-${m.id}`, go: { mid: m.id, stage: "lesson", step: i + 1 } }));
+    if (m.read) add({ kind: "Reading", title: m.read.title, where: `Module ${m.id} · ${m.title} · ${m.read.source}`, text: m.read.why + " " + m.title, go: { url: m.read.url } });
     (m.learn.cards || []).forEach(c => add({ kind: "Flashcard", title: c[0].replace(/`/g, ""), where: `Module ${m.id} · ${m.title}`, text: c[1].replace(/`/g, ""), showText: true, go: { mid: m.id, stage: "lesson", step: 0, best: c[0] + " " + c[1] } }));
     (m.learn.quiz || []).forEach((q, i) => add({ kind: "Quiz", title: q.q.replace(/`/g, ""), where: `Module ${m.id} · ${m.title}`, text: (q.code || "") + " " + q.why, go: { mid: m.id, stage: "quiz" } }));
     if (m.exercise) {
@@ -883,7 +884,7 @@ const Search = {
   close() { $("#searchLayer").hidden = true; },
   draw() {
     const q = $("#searchInput").value;
-    const filters = ["All", "Lessons", "Flashcards", "Quiz", "Exercises", "Cheatsheet", "Projects", "Science"];
+    const filters = ["All", "Lessons", "Flashcards", "Quiz", "Exercises", "Reading", "Cheatsheet", "Projects", "Science"];
     const fEl = $("#searchFilters"); fEl.innerHTML = "";
     filters.forEach(f => fEl.append(h("button", { class: "chip" + (f === this.filter ? " on" : ""), type: "button", onclick: () => { this.filter = f; this.draw(); $("#searchInput").focus(); } }, f)));
     const list = $("#searchResults"); list.innerHTML = "";
@@ -915,6 +916,7 @@ const Search = {
     const q = $("#searchInput").value;
     this.close();
     const g = r.e.go;
+    if (g.url) { const a = h("a", { href: g.url, target: "_blank", rel: "noopener" }); document.body.append(a); a.click(); a.remove(); return; }
     pendingHighlight = tok(q);
     if (g.route) { location.hash = g.route; if (location.hash.slice(1) === g.route) render(); return; }
     const ms = Store.mod(g.mid);
@@ -1130,7 +1132,7 @@ function viewModule(mid) {
   out.push(h("header", { class: "mod-head" },
     h("div", { class: "eyebrow" }, `Module ${mid} · ${partName}`),
     h("h1", {}, m.title),
-    m.goal && h("p", { class: "goal" }, m.goal[0].toUpperCase() + m.goal.slice(1) + (m.time ? ` · ${m.time}` : "")),
+    m.goal && h("p", { class: "goal", html: inlineMd(m.goal[0].toUpperCase() + m.goal.slice(1) + (m.time ? ` · ${m.time}` : "")) }),
     m.learn.big_idea && h("div", { class: "callout" }, h("div", { class: "eyebrow", style: "color:var(--amber)" }, "The big idea"), h("div", { style: "font-size:1.08rem;margin-top:4px" }, m.learn.big_idea))));
   const bar = h("nav", { class: "stages", "aria-label": "Module stages" });
   stages.forEach((s, i) => bar.append(h("button", {
@@ -1276,8 +1278,17 @@ function viewModule(mid) {
           if (nx) location.hash = "m-" + nx.id; else location.hash = "home";
         } }, "Complete module →")),
       reveal);
+    if (m.read) body.append(readingCard(m.read));
   }
   return out;
+}
+
+function readingCard(r) {
+  return h("a", { class: "reading", href: r.url, target: "_blank", rel: "noopener" },
+    h("span", { class: "eyebrow", style: "color:var(--amber)" }, "Continue reading"),
+    h("span", { class: "reading-title" }, r.title + " ↗"),
+    h("span", { class: "muted" }, r.source),
+    h("span", {}, r.why));
 }
 
 function viewPractice(m, body, onNext) {

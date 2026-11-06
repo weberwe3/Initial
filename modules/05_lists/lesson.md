@@ -172,4 +172,6 @@ can point at one list.
 - `sum`, `min`, `max`, `len`, `sorted` do most of your number crunching.
 - `b = a` doesn't copy a list. Use `.copy()`.
 
+**Continue reading:** [Data Structures](https://docs.python.org/3/tutorial/datastructures.html) (the official Python tutorial). Every list method, tuples, sets and dictionaries, plus looping techniques.
+
 **Next:** [Module 06: Dictionaries & sets](../06_dicts_sets/lesson.md)

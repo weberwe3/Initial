@@ -135,3 +135,5 @@ You'll see a progress table. Every module starts empty. Your job over the next
 
 There are no exercises for this module. Head to
 [Module 01: First steps](../01_first_steps/lesson.md).
+
+**Continue reading:** [How to Install Python on Your System](https://realpython.com/installing-python/) (Real Python). Step-by-step installs for Windows, macOS and Linux, plus how to fix a broken PATH.

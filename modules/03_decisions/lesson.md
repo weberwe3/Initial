@@ -174,4 +174,6 @@ def sign(n):
 - Indentation defines blocks. Use 4 spaces.
 - Combine conditions with `and`, `or`, `not`; check membership with `in`.
 
+**Continue reading:** [More Control Flow Tools](https://docs.python.org/3/tutorial/controlflow.html) (the official Python tutorial). if, for, range, break and the newer match statement, all in one place.
+
 **Next:** [Module 04: Loops](../04_loops/lesson.md)

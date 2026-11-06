@@ -155,4 +155,6 @@ print(f"Your money doubles after {years} years: ${balance:,.2f}")
 - `while condition:` repeats until the condition is false.
 - `break` leaves a loop; `continue` skips to the next round.
 
+**Continue reading:** [Iterations](https://www.py4e.com/html3/05-iterations) (Python for Everybody, chapter 5). A gentle, free textbook chapter on loops and the counting, summing and max/min patterns.
+
 **Next:** [Module 05: Lists & tuples](../05_lists/lesson.md)

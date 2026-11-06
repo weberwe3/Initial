@@ -175,4 +175,6 @@ total = sum(row["amount"] for row in rows if row["category"] == "food")
 - `sorted(items, key=lambda x: ...)` sorts by anything.
 - Readability beats cleverness, every time.
 
+**Continue reading:** [Python List Comprehension: Tutorial With Examples](https://realpython.com/list-comprehension-python/) (Real Python). When comprehensions help, when they hurt, and the set/dict/generator variants.
+
 **Next:** [Module 12: Classes & objects](../12_classes/lesson.md)

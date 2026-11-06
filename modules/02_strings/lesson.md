@@ -161,4 +161,6 @@ string you can call the next method on.
 - Strings are immutable: store the result of `.strip()`, `.lower()`, etc.
 - `split()` and `join()` convert between text and lists.
 
+**Continue reading:** [Strings and Character Data in Python](https://realpython.com/python-strings/) (Real Python). Every string method and formatting trick, with examples.
+
 **Next:** [Module 03: Decisions](../03_decisions/lesson.md)

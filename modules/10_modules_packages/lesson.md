@@ -196,6 +196,8 @@ many downloads, and look at the project's homepage before installing.
 - Learn `datetime`, `random`, `collections`, `pathlib`, `csv`, `json`, `argparse`.
 - One **venv** per project; `pip install` inside it; `requirements.txt` to record it.
 
+**Continue reading:** [Virtual Environments and Packages](https://docs.python.org/3/tutorial/venv.html) (the official Python tutorial). venv and pip explained by the Python docs themselves.
+
 **Checkpoint:** you've finished Part 2. Build
 [Project 2: Expense tracker](../../projects/02_expense_tracker.md).
 

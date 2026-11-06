@@ -197,4 +197,6 @@ code that talks to the user catches and explains.**
 - `try` / `except SpecificError` handles expected problems.
 - `raise ValueError("why")` when a function gets bad input.
 
+**Continue reading:** [Errors and Exceptions](https://docs.python.org/3/tutorial/errors.html) (the official Python tutorial). The complete picture of try/except/else/finally, raising, and custom exceptions.
+
 **Next:** [Module 09: Files & data](../09_files_data/lesson.md)

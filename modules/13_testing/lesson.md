@@ -197,4 +197,6 @@ python check.py 13                          # see which planted bugs you catch
 - `pytest.approx` for floats; `parametrize` for many cases; fixtures for setup.
 - Testable code returns values and takes its inputs as parameters.
 
+**Continue reading:** [Get Started](https://docs.pytest.org/en/stable/getting-started.html) (the pytest documentation). Install pytest, write your first tests, and learn fixtures from the source.
+
 **Next:** [Module 14: Working with the web](../14_web_apis/lesson.md)

@@ -238,4 +238,6 @@ few well-chosen classes.
 - `@dataclass` is the quickest way to make a data-holding class.
 - Prefer composition ("has a") over inheritance ("is a").
 
+**Continue reading:** [Classes](https://docs.python.org/3/tutorial/classes.html) (the official Python tutorial). Scopes, instances, inheritance and iterators: how Python's object model really works.
+
 **Next:** [Module 13: Testing](../13_testing/lesson.md)
