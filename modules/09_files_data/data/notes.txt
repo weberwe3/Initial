@@ -1,0 +1,3 @@
+Python is fun.
+Files are just text.
+Automate the boring stuff!
