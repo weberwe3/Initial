@@ -8,3 +8,4 @@ expenses.json
 *.tmp
 .DS_Store
 .vscode/
+app/dist/

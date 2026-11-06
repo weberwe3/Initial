@@ -9,6 +9,29 @@ roughly **4–6 hours a week**. At that pace the course takes about **12 weeks**
 
 ---
 
+## ✨ The interactive version (recommended)
+
+Open **`python-foundry.html`** in your browser (double-click it). You get the
+whole course as an app with real Python running in the page. Nothing to install.
+
+- **Six-stage loop per module:** guess first → short lesson steps with runnable
+  examples → Parsons puzzle → coding exercises with instant checks → recall quiz
+  → explain it in your own words.
+- **Spaced-repetition review** that brings cards back on an expanding schedule
+  (1, 3, 7, 16, 35… days) and mixes topics together.
+- **Predict-before-you-run** mode, confidence ratings and a calibration chart,
+  memory-strength bars, a study plan, a notebook, and a playground.
+- **Search everything** (press `/` or Ctrl+K): lessons, flashcards, quiz
+  questions, exercises, cheatsheet and projects.
+- The **"How it's designed"** page explains the memory research behind each feature.
+
+Progress is saved in your browser. The app is generated from the same
+`modules/` folder as the terminal course: run `python app/build.py` after
+editing a lesson. It needs an internet connection the first time, to download
+Python into the page.
+
+---
+
 ## How this course works
 
 Each module is a folder in `modules/` with three files you'll use:

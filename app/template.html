@@ -1,0 +1,64 @@
+<title>Python Foundry</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="An interactive Python course from zero to intermediate, built on the science of memory.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/*__CSS__*/
+</style>
+
+<div id="app">
+  <aside id="sidebar" aria-label="Course navigation">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">&gt;&gt;&gt;</span>
+      <span class="brand-name">Python Foundry</span>
+    </div>
+    <button class="search-trigger" id="searchOpen" type="button">
+      <span>Search the course</span><kbd>/</kbd>
+    </button>
+    <nav id="nav"></nav>
+    <div class="side-foot">
+      <label class="toggle" for="predictToggle">
+        <input type="checkbox" id="predictToggle">
+        <span>Predict before running</span>
+      </label>
+      <button class="link-btn" id="themeBtn" type="button">Theme: system</button>
+    </div>
+  </aside>
+
+  <div id="main">
+    <header id="topbar">
+      <button id="menuBtn" class="icon-btn" type="button" aria-label="Open menu">☰</button>
+      <div id="crumb"></div>
+      <div id="engine" class="engine" title="Python runs inside your browser">
+        <span class="dot"></span><span id="engineText">Python: not started</span>
+      </div>
+    </header>
+    <main id="view" tabindex="-1"></main>
+  </div>
+</div>
+
+<div id="searchLayer" class="search-layer" hidden>
+  <div class="search-box" role="dialog" aria-modal="true" aria-label="Search the course">
+    <div class="search-input-row">
+      <input id="searchInput" type="search" placeholder="Try: dictionary, f-string, KeyError, decorator…" autocomplete="off">
+      <button class="icon-btn" id="searchClose" type="button" aria-label="Close search">Esc</button>
+    </div>
+    <div id="searchFilters" class="chips"></div>
+    <div id="searchResults" class="search-results" role="listbox"></div>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/shell/shell.min.js"></script>
+<script>
+/*__DATA__*/
+</script>
+<script>
+/*__APP__*/
+</script>
