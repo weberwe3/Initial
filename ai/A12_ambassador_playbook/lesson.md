@@ -1,4 +1,4 @@
-# Module A11: The AI Ambassador Playbook
+# Module A12: The AI Ambassador Playbook
 
 **Goal:** lead AI adoption on your team: find and prioritise use cases, measure value, teach colleagues, manage risk, and communicate results to leadership.
 **Time:** 4 hours, then ongoing.
@@ -151,4 +151,4 @@ ambassador skills.
 
 **Continue reading:** [The State of AI](https://www.mckinsey.com/capabilities/quantumblack/our-insights/the-state-of-ai) (McKinsey Global Survey). The annual survey of how organisations adopt AI and where they see value, useful benchmarks and language for making the business case to leadership.
 
-**Next:** [Module A12: Your AI career](../A12_ai_career/lesson.md)
+**Next:** [Module A13: Your AI career](../A13_ai_career/lesson.md)

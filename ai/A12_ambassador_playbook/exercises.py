@@ -1,5 +1,5 @@
 """
-Module A11 exercises: The ambassador's toolkit.   Run:  python check.py A11
+Module A12 exercises: The ambassador's toolkit.   Run:  python check.py A12
 
 Prioritise use cases, estimate value conservatively, and report adoption,
 the numbers that turn AI enthusiasm into leadership decisions.

@@ -5,7 +5,7 @@ Two hands-on learning tracks, built on the science of memory:
 | Track | From → to | Length |
 |-------|-----------|--------|
 | **[Python](#the-roadmap)** | Never written code → writing real, tested Python programs | 16 modules, ~12 weeks |
-| **[AI for business](#the-ai-track-zero-to-ai-super-user)** | No AI experience → AI super user and AI ambassador at work, including Python + AI for business analytics | 13 modules + capstone, ~10–12 weeks |
+| **[AI for business](#the-ai-track-zero-to-ai-super-user)** | No AI experience → AI super user and AI ambassador at work, including Python + AI for business analytics | 14 modules + capstone, ~11–13 weeks |
 
 No prior experience assumed. You need a computer and roughly **4–6 hours a
 week** per track. The tracks work on their own or side by side; the AI track's
@@ -144,12 +144,17 @@ Check AI-track exercises with `python check.py A5` (module A05), and so on.
 | # | Module | You'll be able to… |
 |---|--------|--------------------|
 | A10 | [Agents & Automation](ai/A10_agents_automation/lesson.md) | Understand how AI agents work (models using tools in a loop), when to use them instead of a simple workflow, and how to keep them safe. |
-| A11 | [The AI Ambassador Playbook](ai/A11_ambassador_playbook/lesson.md) | Lead AI adoption on your team: find and prioritise use cases, measure value, teach colleagues, manage risk, and communicate results to leadership. |
-| A12 | [Your AI Career](ai/A12_ai_career/lesson.md) | Turn this curriculum into career capital: a clear target role, a portfolio that proves your skills, and a story that positions you for AI-related positions. |
+| A11 | [MCP & Skills](ai/A11_mcp_skills/lesson.md) | Understand the two open standards that turn a general AI assistant into *your team's* assistant: MCP (connecting it to tools and data) and Skills (packaging your know-how), well enough to use them, govern them, and build simple ones. |
+| A12 | [The AI Ambassador Playbook](ai/A12_ambassador_playbook/lesson.md) | Lead AI adoption on your team: find and prioritise use cases, measure value, teach colleagues, manage risk, and communicate results to leadership. |
+| A13 | [Your AI Career](ai/A13_ai_career/lesson.md) | Turn this curriculum into career capital: a clear target role, a portfolio that proves your skills, and a story that positions you for AI-related positions. |
 
 **AI capstone:** [Customer-feedback insights pipeline](projects/A_capstone.md):
 label design, a gold set, a baseline vs an AI classifier, an evaluated pipeline,
 a governance note, and an ambassador pack for leadership.
+
+**Tailored to:** Alteryx Designer 2025.1 (embedded Python 3.10, Python tool
+with Interactive Mode) and a company ChatGPT desktop app that routes to on-prem
+models plus a limited set of cloud models.
 
 ### AI track reading list
 | # | Module | Read next |
@@ -165,8 +170,9 @@ a governance note, and an ambassador pack for leadership.
 | A08 | AI Text Analytics & Evaluation | [Classification: accuracy, recall, precision, and related metrics](https://developers.google.com/machine-learning/crash-course/classification/accuracy-precision-recall) · Google Machine Learning Crash Course |
 | A09 | Chat with Your Documents (RAG) | [Contextual retrieval](https://www.anthropic.com/research/contextual-retrieval) · Anthropic |
 | A10 | Agents & Automation | [Building effective AI agents](https://www.anthropic.com/research/building-effective-agents) · Anthropic |
-| A11 | The AI Ambassador Playbook | [The State of AI](https://www.mckinsey.com/capabilities/quantumblack/our-insights/the-state-of-ai) · McKinsey Global Survey |
-| A12 | Your AI Career | [AI Engineer Roadmap](https://roadmap.sh/ai-engineer) · roadmap.sh |
+| A11 | MCP & Skills | [What is the Model Context Protocol?](https://modelcontextprotocol.io/docs/getting-started/intro) · official MCP documentation |
+| A12 | The AI Ambassador Playbook | [The State of AI](https://www.mckinsey.com/capabilities/quantumblack/our-insights/the-state-of-ai) · McKinsey Global Survey |
+| A13 | Your AI Career | [AI Engineer Roadmap](https://roadmap.sh/ai-engineer) · roadmap.sh |
 
 ---
 

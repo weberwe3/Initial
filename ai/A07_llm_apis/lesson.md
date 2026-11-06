@@ -177,7 +177,48 @@ candidates on the same 100 labelled rows and compare accuracy and cost (A08).
 
 ---
 
-## 7. Where to run it in an Alteryx shop
+## 7. Calling your company's models
+
+The examples above use Anthropic's SDK, which needs an Anthropic account
+or a company-approved route to Claude. In many companies, including setups
+like yours with **on-prem models and a limited set of cloud models**, code
+reaches models through an internal **AI gateway** instead. Ask your platform
+team for:
+
+- the **endpoint URL** and the **model names** you're allowed to call,
+- **authentication** (a personal or service key from a secret store, never in code),
+- **rate limits**, quotas, and which **data classes** each model accepts,
+- **logging and retention** rules for prompts and responses.
+
+Many on-prem model servers expose an **OpenAI-compatible** API, so the
+`openai` Python package often works with just a different base URL. A typical
+pattern (the URL, environment variable and model name are placeholders your
+platform team supplies):
+
+```python
+import os
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://ai-gateway.yourcompany.internal/v1",   # from your platform team
+    api_key=os.environ["COMPANY_AI_KEY"],
+)
+response = client.chat.completions.create(
+    model="approved-onprem-model",                            # from your platform team
+    messages=[{"role": "system", "content": "Classify customer comments."},
+              {"role": "user", "content": "<comment>Arrived late again.</comment>"}],
+)
+print(response.choices[0].message.content)
+```
+
+This is exactly why the exercises pass the model call in as a function: your
+row loop, validation, retries and cost logic stay the same whichever model or
+gateway sits behind `call_model`. Swap providers by changing one small function,
+then **re-run your gold set (A08)** to compare an on-prem model with a cloud
+model on accuracy, speed and cost. Often a smaller on-prem model is good enough
+for classification, and a cloud model is worth it only for the hard cases.
+
+## 8. Where to run it in an Alteryx shop
 
 - **Python tool in Alteryx:** call the API per row inside your existing workflow.
 - **A standalone script** scheduled on a server, writing results back to a database.

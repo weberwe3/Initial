@@ -38,6 +38,14 @@ Most companies classify data, something like:
 Find your company's actual policy and the list of approved tools. If there isn't
 one, helping create it is a high-value ambassador project.
 
+### In a multi-model setup like yours
+When one app offers both on-prem and cloud models, the rules are usually
+**per model**: for example, confidential data with on-prem models only and
+public or internal data with cloud models. Learn the mapping, and treat
+switching models mid-chat as sharing the whole conversation with the new
+model. If the rules aren't written down, drafting that table with your
+privacy or IT team is an ideal first ambassador deliverable.
+
 ### What "enterprise" plans usually add
 Contractual commitments not to train on your data, retention controls, admin
 management, single sign-on and audit logs. **Consumer and enterprise versions of

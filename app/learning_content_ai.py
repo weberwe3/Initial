@@ -103,7 +103,11 @@ M_AI["A02"] = {
         {"q": "Why log time saved during your first weeks of AI use?",
          "options": ["It becomes evidence for the business case and your ambassador stories", "AI tools require it",
                      "To slow yourself down", "It improves the model"], "answer": 0,
-         "why": "Measured savings persuade leaders; you'll need them in A11."},
+         "why": "Measured savings persuade leaders; you'll need them in A12."},
+        {"q": "Your chat app offers an on-prem model and a cloud model. You have a confidential customer extract. Which do you use?",
+         "options": ["The model approved for that data class (usually on-prem), per your company's rules", "Whichever is smartest",
+                     "The cloud model, then delete the chat", "Either; it's the same app"], "answer": 0,
+         "why": "Data rules are usually per model. Same app, different data terms."},
         {"q": "What are 'projects' or 'custom instructions' in assistants best used for?",
          "options": ["Saving reusable context like a team glossary and report standards", "Storing passwords",
                      "Making answers longer", "Sharing customer data"], "answer": 0,
@@ -116,6 +120,7 @@ M_AI["A02"] = {
         ("Prompt starter: explain an Alteryx workflow", "'Here's the tool list and config. Explain step by step what it does for a non-technical reader.'"),
         ("The one-week challenge?", "Use AI on 3 real tasks a day for 5 days; log time before/after, quality, and fixes."),
         ("When should you start a new chat?", "For each new task, or when a long conversation drifts and degrades."),
+        ("On-prem vs cloud models in one app: how to route?", "Sensitive data to approved on-prem models; hard non-sensitive reasoning to cloud models if allowed; never switch restricted chats to a cloud model."),
     ],
     "parsons": {"prompt": "Order the decision for choosing an AI tool.",
                 "lines": ["1. Check the data class and approved tools", "2. Needs maths? Use code execution or Python/Alteryx",
@@ -233,6 +238,7 @@ M_AI["A05"] = {
         ("Alteryx Unique in Python?", "Track seen keys in a set; first occurrence → U, repeats → D."),
         ("Alteryx Union in Python?", "Concatenate lists: a + b (pandas: pd.concat)."),
         ("Python tool read/write?", "df = Alteryx.read('#1'); Alteryx.write(df, 1)"),
+        ("Python in Alteryx Designer 2025.1?", "Embedded Python 3.10 with Interactive Mode (a notebook). Tell AI to 'target Python 3.10'. (2026.1 removed Interactive Mode; 2026.2 made the tool AMP-native.)"),
     ],
     "parsons": {"prompt": "A Python tool step inside an Alteryx workflow.",
                 "lines": ["from ayx import Alteryx", "df = Alteryx.read(\"#1\")",
@@ -310,6 +316,7 @@ M_AI["A07"] = {
         ("What's a batch API for?", "Large, non-urgent jobs: submit many requests and collect later, at a discount."),
         ("What is prompt caching?", "Reusing a long, unchanging prompt prefix at a reduced price on repeated calls."),
         ("How should you choose a model?", "Run candidates on the same labelled sample; compare accuracy and cost."),
+        ("What to ask your platform team before calling company models from code?", "Endpoint URL, approved model names, authentication, rate limits, data classes per model, logging/retention rules."),
     ],
     "parsons": {"prompt": "A safe classification loop.",
                 "lines": ["results = []", "for row in rows:", "    try:", "        label = classify(row[\"comment\"])",
@@ -435,6 +442,48 @@ M_AI["A10"] = {
 }
 
 M_AI["A11"] = {
+    "big_idea": "MCP gives an assistant access (tools, resources, prompts); Skills give it your team's know-how, loaded only when relevant. Govern both like software.",
+    "pretest": [0, 4],
+    "quiz": [
+        {"q": "What problem does MCP solve?",
+         "options": ["Every AI app needing custom glue code for every system: one protocol replaces N×M integrations",
+                     "Making models smarter", "Reducing token prices", "Translating languages"],
+         "answer": 0, "why": "Build an MCP server for a system once, and any compatible assistant can use it."},
+        {"q": "Which MCP primitive lets the model take an action like creating a ticket?",
+         "options": ["A tool", "A resource", "A prompt", "A transport"], "answer": 0,
+         "why": "Tools are functions the model calls; resources are read-only data; prompts are reusable templates."},
+        {"q": "Your company's ChatGPT can only use MCP servers that are…",
+         "options": ["Remote (an HTTPS URL) and approved by admins", "Installed on your laptop", "Written in Java", "Free"],
+         "answer": 0, "why": "ChatGPT connects to remote servers; in company deployments, IT hosts and approves connectors."},
+        {"type": "output", "q": "A mini MCP request: what does this print?",
+         "code": "import json\nreq = {'jsonrpc': '2.0', 'id': 7, 'method': 'tools/list'}\nprint(req['method'], json.dumps(req['id']))",
+         "answer": "tools/list 7", "why": "MCP messages are plain JSON-RPC: a method name, an id, and optional params."},
+        {"q": "What decides whether an assistant picks a Skill?",
+         "options": ["The Skill's description (what it does and when to use it)", "The folder name's length",
+                     "How many scripts it has", "The file's creation date"], "answer": 0,
+         "why": "Only names and descriptions are always loaded (progressive disclosure), so the description must match how people ask."},
+        {"q": "A tool is annotated readOnlyHint: true. Can you skip reviewing it?",
+         "options": ["No: annotations are hints from the author, not guarantees; check its real permissions",
+                     "Yes, it's guaranteed safe", "Only on Fridays", "Yes, if it's popular"], "answer": 0,
+         "why": "Trust the server's actual credentials and code, not its labels."},
+    ],
+    "cards": [
+        ("MCP vs Skills in one line each?", "MCP = access to tools and data through one open protocol. Skills = packaged procedures (instructions, templates, scripts)."),
+        ("The three MCP server primitives?", "Tools (actions the model calls), resources (read-only context), prompts (reusable templates)."),
+        ("The two standard MCP transports?", "stdio (local program on your machine) and Streamable HTTP (a server at a URL)."),
+        ("What's in a Skill folder?", "SKILL.md (frontmatter with name + description, then steps), plus optional templates, reference files and scripts."),
+        ("What is progressive disclosure?", "Only skill names and descriptions are always loaded; the body loads when relevant; extra files only when a step needs them."),
+        ("Five MCP risks to govern?", "Over-broad access, untrusted servers, prompt injection via tool results, tool poisoning, silent changes (+ no audit trail)."),
+        ("Rules for a Skill name?", "Up to 64 characters, lowercase letters, numbers and hyphens; some products reserve vendor words."),
+    ],
+    "parsons": {"prompt": "A minimal MCP server with one read-only tool (official Python SDK).",
+                "lines": ["from mcp.server import MCPServer", "mcp = MCPServer(\"team-metrics\")", "@mcp.tool()",
+                          "def get_metric(name: str, month: str) -> str:", "    \"\"\"Return a KPI value for a month (YYYY-MM).\"\"\"",
+                          "    return lookup(name, month)", "mcp.run(transport=\"stdio\")"]},
+    "explain": "Propose one MCP connector and one Skill for your team. For each: what it does, what data it touches, which models may use it, and the guardrails.",
+}
+
+M_AI["A12"] = {
     "big_idea": "Lead adoption like a product: find use cases, prioritise by value × feasibility minus risk, pilot against a baseline, and report evidence.",
     "pretest": [0, 3],
     "quiz": [
@@ -473,7 +522,7 @@ M_AI["A11"] = {
     "explain": "Draft your team's first AI pilot: the task, the baseline you'll measure, the guardrails, and how you'll report the result.",
 }
 
-M_AI["A12"] = {
+M_AI["A13"] = {
     "big_idea": "Domain + data + Python + AI is rare and valuable. Prove it with evaluated, measured projects and tell it as situation → action → result.",
     "pretest": [0, 2],
     "quiz": [

@@ -1,12 +1,12 @@
 # AI Track Capstone: Customer-Feedback Insights Pipeline
 
-**After:** Module A11 · **Time:** 15–25 hours over 2–4 weeks
+**After:** Module A12 · **Time:** 15–25 hours over 2–4 weeks
 
 Build the project that proves you can take AI from idea to measured business
 value: an AI pipeline that turns thousands of free-text comments into
 decisions, evaluated properly and presented like an AI ambassador would.
 
-It doubles as your strongest portfolio piece (Module A12) and as a template
+It doubles as your strongest portfolio piece (Module A13) and as a template
 you can reuse at work.
 
 ---
@@ -62,7 +62,7 @@ Print or log row counts at every step and reconcile them.
 - [ ] One page: data used, data classes, minimisation steps, approved tools,
       verification, human review, known limitations
 
-### 8. Ambassador pack (A11)
+### 8. Ambassador pack (A12)
 - [ ] Value estimate: hours saved and coverage gained (from sample to 100%), with assumptions
 - [ ] A 5-slide (or one-page) leadership update: headline, evidence, risks and controls, next step, ask
 - [ ] A 15-minute demo script for your team
@@ -75,6 +75,12 @@ Print or log row counts at every step and reconcile them.
   say about the mobile app?") with cited examples.
 - **Agent add-on (A10):** a read-only agent that answers trend questions by
   calling your summary functions, with every tool call logged.
+- **MCP add-on (A11):** expose your summary tables through a small read-only MCP
+  server (e.g. `get_theme_counts(month)`), and write a proposal for IT to host
+  it for your team's approved models.
+- **Skill add-on (A11):** package your monthly insights procedure as a Skill
+  (`SKILL.md` + template + the script that computes the tables), and test that
+  it triggers on realistic requests.
 - **Monitoring:** compare each month's label distribution with the last and flag big shifts.
 - **Segment fairness:** check accuracy by language, region or customer type.
 

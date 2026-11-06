@@ -729,7 +729,7 @@ function isRunnable(code) {
   return true;
 }
 // Code that needs packages, network access or an API key the browser doesn't have
-const needsComputer = code => /^\s*(import|from)\s+(pandas|numpy|matplotlib|anthropic|openai|ayx|sklearn|openpyxl)\b/m.test(code)
+const needsComputer = code => /^\s*(import|from)\s+(pandas|numpy|matplotlib|anthropic|openai|ayx|sklearn|openpyxl|mcp)\b/m.test(code)
   || /\b(pd|np|plt)\.\w+\(|client\.messages\.|Alteryx\.(read|write)\(/.test(code);
 
 function codeBlock(code, { key = "play", cwd = "/course/play", support = null, lang = "python", runnable = true } = {}) {
@@ -1265,7 +1265,7 @@ function viewHome() {
       h("div", { class: "eyebrow" }, `${tinfo.long} · ${tmods.length} modules`),
       h("h1", {}, startedTrack ? "Pick up where you left off." : ui.track === "ai" ? "Become the AI expert your team relies on." : "Learn Python so it sticks."),
       h("p", {}, ui.track === "ai"
-        ? "From no experience to AI super user at work: prompting, responsible use, AI-assisted analysis, Alteryx to Python, calling AI from code, text analytics, RAG, agents, and leading adoption as an AI ambassador."
+        ? "From no experience to AI super user at work: prompting, responsible use, AI-assisted analysis, Alteryx to Python, calling AI from code, text analytics, RAG, agents, MCP and Skills, and leading adoption as an AI ambassador."
         : startedTrack ? "Each module follows the same loop: guess, learn in small steps, rebuild, practise, recall, explain. Reviews bring old ideas back right before you'd forget them."
         : "Real Python runs in your browser. Every module is built on memory research: retrieval, spacing, interleaving and prediction. The point is to still know it in six months."),
       h("div", { class: "row" },

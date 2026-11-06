@@ -42,7 +42,7 @@ PARTS = [
     ("Part 3 · Intermediate", ["11", "12", "13", "14", "15"], "python"),
     ("Part 1 · AI foundations", ["A00", "A01", "A02", "A03"], "ai"),
     ("Part 2 · AI + Python for analytics", ["A04", "A05", "A06", "A07", "A08", "A09"], "ai"),
-    ("Part 3 · Super user & ambassador", ["A10", "A11", "A12"], "ai"),
+    ("Part 3 · Super user & ambassador", ["A10", "A11", "A12", "A13"], "ai"),
 ]
 TRACK_ROOTS = [("python", ROOT / "modules"), ("ai", ROOT / "ai")]
 

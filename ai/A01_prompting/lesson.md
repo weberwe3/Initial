@@ -147,7 +147,7 @@ Prompting is iterative. When output is off, diagnose before rewriting:
 
 Keep a **prompt library**: prompts that worked, saved with a note on when to
 use them. As an ambassador, a shared team library is one of the highest-value
-things you can create (Module A11).
+things you can create (Module A12).
 
 ---
 

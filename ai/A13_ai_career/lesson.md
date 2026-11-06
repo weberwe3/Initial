@@ -1,4 +1,4 @@
-# Module A12: Your AI Career
+# Module A13: Your AI Career
 
 **Goal:** turn this curriculum into career capital: a clear target role, a portfolio that proves your skills, and a story that positions you for AI-related positions.
 **Time:** 2 hours to plan, then a 90-day plan to execute.
@@ -36,8 +36,8 @@ Rate yourself 1–5 today, then again in 90 days:
 | Responsible AI | Data classes, minimisation, verification, bias, regulation | A03 |
 | Analysis | AI-assisted analysis, verification, pandas | A04–A06 |
 | AI engineering | APIs, structured outputs, row-level automation, evaluation | A07–A08 |
-| Advanced patterns | RAG, agents, tool use, MCP | A09–A10 |
-| Leadership | Use-case discovery, ROI, teaching, governance | A11 |
+| Advanced patterns | RAG, agents, tool use, MCP servers, Skills | A09–A11 |
+| Leadership | Use-case discovery, ROI, teaching, governance | A12 |
 | Python | Core language through intermediate | Python track |
 
 ---
@@ -111,7 +111,7 @@ Pick one or two that match your target role and your company's technology stack.
 |------|-------|--------|
 | 1–30 | Daily AI use; A00–A04; guardrail card; prompt library v1 | Evidence log; first team demo |
 | 31–60 | A05–A08; capstone pipeline on a real or public dataset | Evaluated pipeline; write-up |
-| 61–90 | A09–A11; run a use-case workshop and one pilot | Pilot results; leadership one-pager; portfolio on GitHub |
+| 61–90 | A09–A12; run a use-case workshop and one pilot | Pilot results; leadership one-pager; portfolio on GitHub |
 
 At day 90, update your CV and internal profile, share the pilot results, and
 have a conversation with your manager about where AI fits in your next role.

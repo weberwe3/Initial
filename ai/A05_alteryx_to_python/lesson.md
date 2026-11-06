@@ -128,7 +128,7 @@ You'll write it in the exercises, then see the one-line pandas version in A06.
 
 ---
 
-## 7. Python inside Alteryx: the Python tool
+## 7. Python inside Alteryx: the Python tool (Designer 2025.1)
 
 The Python tool (Developer category) runs Python as a step in your workflow.
 Data comes in from the input anchor as a **pandas DataFrame**, and you send
@@ -142,12 +142,33 @@ df["is_large"] = df["amount"] > 1000             # any Python / pandas logic
 Alteryx.write(df, 1)                             # → output anchor 1
 ```
 
-Good uses: an API call per row (AI classification!), advanced text processing,
-a statistics or ML library Alteryx doesn't have, or reusing a script a
-colleague wrote. Check your Designer version's documentation for setup details
-and package management.
+### What's specific to your version (2025.1)
 
----
+| Topic | In Designer 2025.1 | Why it matters to you |
+|-------|--------------------|-----------------------|
+| **Python version** | Embedded **Python 3.10** | Write 3.10-compatible code. Everything in the Python track works on 3.10 except a few newer conveniences, and AI assistants should be told: *"target Python 3.10"*. |
+| **Interactive Mode** | **Available**: the tool opens a Jupyter notebook where you run cells and see DataFrames as you go | Develop and debug interactively, then switch to production mode so the workflow runs the code unattended |
+| **AMP engine** | Native AMP support for the Python tool arrived later (2026.2) | If your workflows run on AMP, test Python-tool workflows carefully, and check the engine-compatibility guidance in Alteryx Help if results or performance look off |
+| **Packages** | pandas and common libraries come with the embedded environment; extra packages are installed through the `ayx` package's install helper or by an admin | Installing packages may need admin rights or IT approval. Ask before relying on a new library in a shared workflow |
+
+> **When your company upgrades:** Designer 2026.1 removed Interactive Mode and
+> moved the embedded Python to 3.13, and 2026.2 made the Python tool AMP-native.
+> Code written for 3.10 generally keeps working on 3.13, but re-test shared
+> workflows after any upgrade, and keep a copy of your notebook code as `.py`
+> files so nothing lives only inside a tool.
+
+### A practical development loop on 2025.1
+
+1. Connect a **small sample** (Sample tool → first 100 rows) into the Python tool.
+2. Develop in **Interactive Mode**: read, transform, `print(df.shape)`, inspect.
+3. Keep the logic in **functions**, so the notebook stays readable.
+4. Switch to production mode, remove the sample, and compare row counts and
+   totals with the Alteryx-only version of the step.
+5. Save the code in your team's repository or shared folder as well.
+
+Good uses: an API call per row (AI classification, A07), advanced text
+processing, a statistics library Alteryx doesn't have, or reusing a script a
+colleague wrote.
 
 ## 8. Using AI to translate workflows
 
@@ -179,6 +200,6 @@ trust in the translation, and in AI-generated code generally.
 - Formula ≈ a computed key; Multi-Row ≈ a loop that remembers the previous row; Summarize ≈ dict accumulators.
 - The Python tool (`Alteryx.read` / `Alteryx.write`) lets you mix both worlds.
 
-**Continue reading:** [Python Tool](https://help.alteryx.com/current/en/designer/tools/developer/python-tool.html) (Alteryx Designer documentation). How to use Python inside your workflows, including reading and writing data with the `ayx` package and managing packages.
+**Continue reading:** [Python Tool](https://help.alteryx.com/current/en/designer/tools/developer/python-tool.html) (Alteryx Designer documentation). How to use Python inside your workflows, including reading and writing data with the `ayx` package and managing packages. Use the version selector in Alteryx Help to read the 2025.1 page, since the tool changed in 2026.
 
 **Next:** [Module A06: pandas for business analytics](../A06_pandas_analytics/lesson.md)

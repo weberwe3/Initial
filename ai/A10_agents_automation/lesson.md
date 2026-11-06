@@ -86,12 +86,11 @@ Official SDKs also include helpers that run this loop for you.
 
 ## 3. Connecting tools: MCP
 
-The **Model Context Protocol (MCP)** is an open standard for connecting AI
-assistants to tools and data sources (databases, file stores, ticketing systems,
-SaaS apps) without custom glue for each assistant. When an assistant offers
-"connectors" or "integrations", MCP is often what's underneath. For an
-ambassador: it means one approved connector to, say, your data warehouse can
-serve several AI tools, with access controls in one place.
+The **Model Context Protocol (MCP)** is the open standard for connecting AI
+assistants to tools and data: one MCP server per system, usable by any
+compatible assistant. **Skills** package your team's procedures so an assistant
+follows them automatically. Both get a full module next (**A11**), including
+how they work in a company ChatGPT deployment and how to build simple ones.
 
 ---
 
@@ -147,4 +146,4 @@ anything that leaves the team.**
 
 **Continue reading:** [Building effective AI agents](https://www.anthropic.com/research/building-effective-agents) (Anthropic). A practical, hype-free guide to agent and workflow patterns (prompt chaining, routing, orchestrator-workers, evaluator loops) and when each is worth the complexity.
 
-**Next:** [Module A11: The AI ambassador playbook](../A11_ambassador_playbook/lesson.md)
+**Next:** [Module A11: MCP & Skills](../A11_mcp_skills/lesson.md)

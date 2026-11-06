@@ -45,7 +45,44 @@ When comparing tools, look for:
 
 ---
 
-## 3. Ten workflows for a business analyst
+## 3. Your setup: one desktop app, several models behind it
+
+Many companies (including yours) give people a familiar chat app, such as a
+ChatGPT desktop app, that routes to **several models behind the scenes**:
+some **on-premises** (running on company servers, often open-weight models)
+and a **limited set of cloud models**. That's a smart design for data control,
+and it changes how a super user works.
+
+| | On-prem models | Cloud models |
+|---|----------------|--------------|
+| **Data** | Usually stays inside the company network, so it's often approved for more sensitive data | Leaves the network under contract, so it's often restricted to lower data classes or specific use cases |
+| **Capability** | Often smaller or older; good at summarising, drafting, reformatting, simple classification | Usually the most capable at complex reasoning, long documents, code, and tool use |
+| **Context window** | Can be smaller, so long documents may need splitting | Usually large |
+| **Features** | File analysis, code execution, web search or connectors may be unavailable or limited | More likely to support the full feature set |
+| **Availability** | Generally available | Often quota-limited or approved per use case |
+
+**How to work well in this setup:**
+1. **Know the menu.** Find out exactly which models you can pick, which are
+   on-prem vs cloud, and **which data each is approved for**. Write it down;
+   your colleagues will want the same cheat sheet.
+2. **Route by task and data.** Sensitive data → approved on-prem model.
+   Hard reasoning on non-sensitive material → cloud model, if allowed.
+   Everyday drafting → whichever is approved and fastest.
+3. **Prompt smaller models more explicitly.** Shorter inputs, clearer
+   numbered steps, an example of the output, one task per prompt (A01).
+   What a frontier model infers, a smaller model may need spelled out.
+4. **Benchmark your own top tasks.** Run your five most common prompts on each
+   model and note quality. Re-test when IT adds or upgrades a model. That
+   comparison table is a ready-made ambassador deliverable.
+5. **Never move restricted content to a cloud model** by switching models
+   mid-conversation. Start a new chat instead, and check whether the content is
+   allowed there at all.
+6. **Note which model produced what** for anything important, so results can
+   be checked and reproduced.
+
+---
+
+## 4. Ten workflows for a business analyst
 
 Start with these. Each one saves real time within a week.
 
@@ -67,7 +104,7 @@ That's Module A01 in action.
 
 ---
 
-## 4. Choosing the right tool for the task
+## 5. Choosing the right tool for the task
 
 ```text
 Is the data confidential or regulated?
@@ -82,7 +119,7 @@ Is the data confidential or regulated?
 
 ---
 
-## 5. Habits of AI super users
+## 6. Habits of AI super users
 
 1. **Default to trying AI first** for any language-heavy task, then judge the result.
 2. **Give context once:** keep a reusable "about my team" note (glossary,
@@ -91,11 +128,11 @@ Is the data confidential or regulated?
 4. **Iterate in the same conversation:** "shorter", "more formal", "now as a table".
 5. **Start fresh for a new task.** Long, wandering chats get worse; context matters.
 6. **Save what works** in your prompt library.
-7. **Track time saved.** You'll need numbers to make the case for AI (A11).
+7. **Track time saved.** You'll need numbers to make the case for AI (A12).
 
 ---
 
-## 6. Your one-week challenge
+## 7. Your one-week challenge
 
 For five working days, use AI on at least **three real tasks a day**. For each, note:
 
