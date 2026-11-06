@@ -297,6 +297,35 @@ mark.flash { animation: flash 1.6s ease-out 2; }
 .cm-s-default .cm-builtin { color: var(--tok-builtin); }
 .cm-s-default .cm-variable, .cm-s-default .cm-variable-2, .cm-s-default .cm-property { color: var(--code-ink); }
 .cm-s-default .cm-operator, .cm-s-default .cm-meta { color: var(--muted); }
+/* IDE extras: current line, matching brackets, suggestions, error markers */
+.CodeMirror-focused .CodeMirror-activeline-background { background: color-mix(in srgb, var(--accent) 7%, transparent); }
+.CodeMirror-activeline-background { background: transparent; }
+.CodeMirror-focused .CodeMirror-activeline .CodeMirror-gutter-elt { color: var(--ink); }
+.CodeMirror .CodeMirror-matchingbracket { color: var(--good) !important; font-weight: 700; background: var(--good-soft); border-radius: 2px; }
+.CodeMirror .CodeMirror-nonmatchingbracket { color: var(--bad) !important; background: var(--bad-soft); }
+.CodeMirror-lint-markers { width: 16px; }
+.CodeMirror-lint-mark-error {
+  background-image: none; text-decoration: underline wavy var(--bad); text-decoration-skip-ink: none; text-underline-offset: 3px;
+}
+.CodeMirror-lint-marker-error {
+  background-image: none; width: 12px; height: 12px; margin: 3px 0 0 2px; border-radius: 50%;
+  background: var(--bad); cursor: help;
+}
+.CodeMirror-lint-marker-multiple { display: none; }
+.CodeMirror-lint-tooltip {
+  font: 13px/1.45 var(--font-body); background: var(--ink); color: var(--paper); border: 0; border-radius: 8px;
+  padding: 7px 10px; box-shadow: var(--shadow); max-width: 420px; z-index: 70;
+}
+.CodeMirror-lint-message { background-image: none; padding-left: 0; }
+.CodeMirror-hints {
+  font: 13.5px/1.4 var(--font-code); background: var(--surface); color: var(--ink); border: 1px solid var(--line);
+  border-radius: 8px; box-shadow: var(--shadow); padding: 4px; max-height: 15em; z-index: 70;
+}
+.CodeMirror-hint { color: var(--ink); padding: 3px 8px; border-radius: 5px; }
+li.CodeMirror-hint-active { background: var(--accent); color: var(--accent-ink); }
+.editor-help { font-size: 12.5px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 14px; padding: 6px 12px; border-top: 1px dashed var(--line); background: var(--surface); }
+.editor-help kbd { font-size: 10.5px; padding: 2px 5px; }
+
 .output {
   margin: 0; padding: 10px 14px; border-top: 1px dashed var(--line); font: 13.5px/1.5 var(--font-code);
   white-space: pre-wrap; word-break: break-word; background: var(--surface); color: var(--ink); max-height: 340px; overflow: auto;

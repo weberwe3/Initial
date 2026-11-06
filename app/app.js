@@ -250,6 +250,21 @@ def run(code, key="play", stdin=(), cwd="/course/play", support=None, fresh=Fals
     result["out"] = out.getvalue()
     return result
 
+def lint(code):
+    try:
+        compile(code, "<your code>", "exec")
+    except SyntaxError as e:
+        msg = e.msg
+        if e.lineno is None:
+            return {"errors": [{"line": 1, "col": 0, "end_line": 1, "end_col": 1, "msg": msg}]}
+        line, col = e.lineno, max((e.offset or 1) - 1, 0)
+        end_line = getattr(e, "end_lineno", None) or line
+        end_col = getattr(e, "end_offset", None)
+        end_col = end_col - 1 if end_col and (end_line > line or end_col - 1 > col) else col + 1
+        return {"errors": [{"line": line, "col": col, "end_line": end_line, "end_col": end_col,
+                            "msg": f"{type(e).__name__}: {msg}"}]}
+    return {"errors": []}
+
 def _load(path, name):
     spec = importlib.util.spec_from_file_location(name, path)
     module = importlib.util.module_from_spec(spec)
@@ -397,7 +412,7 @@ function workerMain() {
         return;
       }
       py.globals.set("_args_json", JSON.stringify(m.args));
-      const fn = m.op === "check" ? "check" : "run";
+      const fn = m.op === "check" ? "check" : m.op === "lint" ? "lint" : "run";
       const r = py.runPython(`import json, _foundry\njson.dumps(_foundry.${fn}(**json.loads(_args_json)))`);
       self.postMessage({ id: m.id, result: JSON.parse(r) });
     } catch (err) {
@@ -445,12 +460,13 @@ const Engine = {
     });
     return this.starting;
   },
-  send(msg, timeout) {
+  send(msg, timeout, gentle = false) {
     return new Promise((resolve, reject) => {
       const id = ++this.seq;
       const timer = setTimeout(() => {
         this.pending.delete(id);
         reject(Object.assign(new Error("timeout"), { timeout: true }));
+        if (gentle) return;            // background work (linting) never kills a running program
         this.reset();
         this.setStatus("idle", "Python: stopped");
       }, timeout);
@@ -467,6 +483,10 @@ const Engine = {
   stop() { this.reset(); this.setStatus("idle", "Python: stopped"); },
   async run(args) { await this.start(); return this.send({ op: "run", args }, 10000); },
   async check(args) { await this.start(); return this.send({ op: "check", args }, 20000); },
+  lint(code) {
+    if (this.status !== "ready" || !this.worker) return Promise.resolve(null);
+    return this.send({ op: "lint", args: { code } }, 4000, true).catch(() => null);
+  },
 };
 
 const ERROR_HINTS = {
@@ -509,17 +529,189 @@ const normalise = s => String(s).trim().split("\n").map(l => l.trim().replace(/\
    Code blocks (editable + runnable) and markdown rendering
    ===================================================================== */
 let liveEditors = [];
+
+/* ---- IDE features: autocomplete word lists ---- */
+const PY_KEYWORDS = "False None True and as assert async await break class continue def del elif else except finally for from global if import in is lambda nonlocal not or pass raise return try while with yield match case".split(" ");
+const PY_BUILTINS = "abs all any ascii bin bool breakpoint bytearray bytes callable chr classmethod compile complex delattr dict dir divmod enumerate eval exec filter float format frozenset getattr globals hasattr hash help hex id input int isinstance issubclass iter len list locals map max memoryview min next object oct open ord pow print property range repr reversed round set setattr slice sorted staticmethod str sum super tuple type vars zip __name__ __main__ __init__ __str__ __repr__ __eq__ __lt__ __add__ __len__ __enter__ __exit__ self NotImplementedError ValueError TypeError KeyError IndexError ZeroDivisionError FileNotFoundError Exception AttributeError RuntimeError StopIteration".split(" ");
+const PY_MODULES = "math random datetime json csv os sys pathlib collections statistics itertools functools contextlib dataclasses typing re time urllib argparse shutil".split(" ");
+const TYPE_METHODS = {
+  str: "strip split join replace lower upper title startswith endswith find count format isdigit isalpha isalnum isspace lstrip rstrip splitlines capitalize rsplit rfind index zfill center ljust rjust encode isupper islower partition casefold removeprefix removesuffix".split(" "),
+  list: "append extend insert remove pop sort reverse index count copy clear".split(" "),
+  dict: "get items keys values update pop setdefault copy clear popitem fromkeys".split(" "),
+  set: "add discard remove union intersection difference issubset issuperset pop update clear copy symmetric_difference".split(" "),
+  file: "read readline readlines write writelines close seek".split(" "),
+  path: "exists read_text write_text name stem suffix parent is_file is_dir iterdir glob rglob mkdir rename with_suffix resolve open unlink joinpath".split(" "),
+  response: "json status_code raise_for_status text headers url ok".split(" "),
+  counter: "most_common items keys values get update total elements".split(" "),
+  date: "isoformat strftime year month day weekday replace today".split(" "),
+  datetime: "isoformat strftime year month day hour minute second weekday date replace now strptime".split(" "),
+};
+const MODULE_MEMBERS = {
+  math: "sqrt floor ceil pi e hypot pow log log10 isclose inf fabs factorial gcd".split(" "),
+  random: "randint choice shuffle random seed sample uniform choices".split(" "),
+  json: "dumps loads dump load JSONDecodeError".split(" "),
+  csv: "DictReader DictWriter reader writer".split(" "),
+  os: "environ getcwd listdir path makedirs remove rename chdir sep".split(" "),
+  sys: "argv exit path version stdout stdin".split(" "),
+  datetime: "date datetime timedelta timezone".split(" "),
+  date: "today fromisoformat".split(" "),
+  statistics: "mean median mode stdev variance".split(" "),
+  collections: "Counter defaultdict namedtuple deque OrderedDict".split(" "),
+  itertools: "islice chain groupby count cycle product permutations combinations zip_longest accumulate".split(" "),
+  functools: "wraps cache lru_cache partial reduce".split(" "),
+  contextlib: "contextmanager suppress".split(" "),
+  dataclasses: "dataclass field asdict".split(" "),
+  time: "sleep time perf_counter".split(" "),
+  re: "search match findall sub compile fullmatch split".split(" "),
+  pathlib: ["Path"], shutil: "copy move rmtree copytree".split(" "),
+  string: "ascii_letters ascii_lowercase ascii_uppercase digits punctuation".split(" "),
+  pytest: "raises approx mark fixture param fail".split(" "),
+  mark: ["parametrize"], requests: "get post put delete RequestException Timeout HTTPError".split(" "),
+  urllib: ["parse"], parse: "urlencode quote urlparse".split(" "),
+  typing: "Any Optional Iterator Iterable Callable".split(" "),
+};
+const ALL_METHODS = [...new Set(Object.values(TYPE_METHODS).flat())];
+
+/* Guess what kind of value `name` holds from the last place it was assigned. */
+function guessType(name, code, lineNo) {
+  if (MODULE_MEMBERS[name] && new RegExp(`^\\s*(import|from)\\s+[\\w.]*\\b${name}\\b`, "m").test(code)) return { module: name };
+  const lines = code.split("\n").slice(0, lineNo + 1).reverse();
+  const assign = new RegExp(`(?:^|[\\s,(])${name}\\s*(?::\\s*([\\w\\[\\], ]+))?\\s*=(?!=)\\s*(.+)$`);
+  const loop = new RegExp(`\\bwith\\s+open\\(.*\\)\\s+as\\s+${name}\\b`);
+  for (const ln of lines) {
+    if (loop.test(ln)) return { type: "file" };
+    const m = assign.exec(ln); if (!m) continue;
+    const hint = (m[1] || "").trim(), rhs = m[2].trim();
+    const lastCall = (rhs.match(/\.(\w+)\([^()]*\)\s*$/) || [])[1];
+    const RETURNS = { split: "list", rsplit: "list", splitlines: "list", readlines: "list", copy: null, keys: null, items: null,
+      strip: "str", lower: "str", upper: "str", replace: "str", title: "str", join: "str", read_text: "str", read: "str", format: "str",
+      get: null, most_common: "list", json: "dict", today: "date", now: "datetime", strptime: "datetime", fromisoformat: "date" };
+    if (lastCall && lastCall in RETURNS) return RETURNS[lastCall] ? { type: RETURNS[lastCall] } : null;
+    if (/^(str)\b/.test(hint) || /^[rbuf]?["']/.test(rhs) || /^(str|input)\(/.test(rhs) || /\.(strip|lower|upper|replace|title|read_text|read)\(/.test(rhs) || /^".*"\s*\.join/.test(rhs)) return { type: "str" };
+    if (/^list\b/.test(hint) || /^\[/.test(rhs) || /^(list|sorted)\(/.test(rhs) || /\.(split|splitlines|readlines)\(/.test(rhs)) return { type: "list" };
+    if (/^set\b/.test(hint) || /^set\(/.test(rhs) || /^\{\s*[^:}]+\s*(,|\})/.test(rhs) && !/:/.test(rhs)) return { type: "set" };
+    if (/^dict\b/.test(hint) || /^\{/.test(rhs) || /^(dict|defaultdict)\(/.test(rhs) || /json\.loads?\(/.test(rhs)) return { type: "dict" };
+    if (/^Counter\(/.test(rhs)) return { type: "counter" };
+    if (/^(Path\(|Path\.|.*\/\s*["'])/.test(rhs)) return { type: "path" };
+    if (/^open\(/.test(rhs)) return { type: "file" };
+    if (/requests\.(get|post)\(/.test(rhs)) return { type: "response" };
+    if (/^(date\.today|date\(|date\.fromisoformat)/.test(rhs)) return { type: "date" };
+    if (/^(datetime\.(now|strptime)|datetime\()/.test(rhs)) return { type: "datetime" };
+    return null;
+  }
+  return null;
+}
+
+function pyHint(cm) {
+  const cur = cm.getCursor();
+  const type = cm.getTokenTypeAt(cur) || "";
+  if (/string|comment/.test(type)) return null;
+  const line = cm.getLine(cur.line);
+  let start = cur.ch;
+  while (start > 0 && /\w/.test(line[start - 1])) start--;
+  const word = line.slice(start, cur.ch);
+  const afterDot = line[start - 1] === ".";
+  if (!word && !afterDot) return null;
+  const code = cm.getValue();
+  const before = line.slice(0, start).trim();
+  let pool;
+  if (afterDot) {
+    const objText = line.slice(0, start - 1);
+    const obj = (objText.match(/(\w+)$/) || [])[1];
+    const attrs = [...new Set((code.match(/\.(\w+)/g) || []).map(x => x.slice(1)))];
+    let g = null;
+    if (/["']$/.test(objText)) g = { type: "str" };
+    else if (/\]$/.test(objText)) g = null;
+    else if (obj) g = guessType(obj, code, cur.line);
+    if (g && g.module) pool = MODULE_MEMBERS[g.module];
+    else if (g && g.type) pool = TYPE_METHODS[g.type];
+    else if (obj === "self") pool = attrs;
+    else pool = [...ALL_METHODS, ...attrs];
+  } else if (/^(import|from)\b/.test(before) && !/\bimport\b.*\bimport\b/.test(before) && !(/^from\b/.test(before) && /\bimport\b/.test(before))) {
+    pool = Object.keys(MODULE_MEMBERS).filter(k => !["mark", "parse", "date"].includes(k));
+  } else {
+    const docWords = [...new Set(code.match(/\b[A-Za-z_]\w+\b/g) || [])].filter(w => w !== word);
+    pool = [...docWords, ...PY_KEYWORDS, ...PY_BUILTINS];
+  }
+  const lw = word.toLowerCase();
+  // keep the pool's order (most common first); exact-case prefix matches win
+  const list = [...new Set(pool)].filter(w => w !== word && w.toLowerCase().startsWith(lw))
+    .map((w, i) => [w, i]).sort((a, b) => (b[0].startsWith(word) - a[0].startsWith(word)) || a[1] - b[1]).map(x => x[0]).slice(0, 25);
+  return list.length ? { list, from: CodeMirror.Pos(cur.line, start), to: cur } : null;
+}
+function showHints(cm) {
+  cm.showHint({
+    hint: pyHint, completeSingle: false, closeOnUnfocus: true,
+    customKeys: {
+      Up: (c, hd) => hd.moveFocus(-1), Down: (c, hd) => hd.moveFocus(1),
+      PageUp: (c, hd) => hd.moveFocus(-hd.menuSize() + 1, true), PageDown: (c, hd) => hd.moveFocus(hd.menuSize() - 1, true),
+      Tab: (c, hd) => hd.pick(), Esc: (c, hd) => hd.close(),
+      // Enter keeps its normal meaning (new line) so a suggestion never replaces what you typed by surprise
+      Enter: (c, hd) => { hd.close(); return CodeMirror.Pass; },
+    },
+  });
+}
+
+/* ---- IDE features: live syntax checking with the in-browser Python ---- */
+function pyLint(text, updateLinting, options, cm) {
+  if (!text.trim()) return updateLinting([]);
+  Engine.lint(text).then(res => {
+    if (!res || cm.getValue() !== text) return; // engine busy/unavailable, or code changed meanwhile
+    updateLinting(res.errors.map(e => {
+      const ln = Math.min(e.line - 1, cm.lineCount() - 1);
+      const len = cm.getLine(ln).length;
+      let col = e.col, endLine = Math.min(e.end_line - 1, cm.lineCount() - 1), endCol = Math.max(e.end_col, e.col + 1);
+      if (col >= len) {            // error points past the end of the line (e.g. a missing ":"): underline the last word
+        const m = /(\S+)\s*$/.exec(cm.getLine(ln));
+        col = m ? m.index : Math.max(0, len - 1); endLine = ln; endCol = len;
+      }
+      return { from: CodeMirror.Pos(ln, col), to: CodeMirror.Pos(endLine, Math.max(endCol, col + 1)), message: e.msg, severity: "error" };
+    }));
+  });
+}
+pyLint.async = true;
+
+const editorHelp = () => h("div", { class: "editor-help" },
+  h("span", {}, h("kbd", {}, "Tab"), " accept suggestion / indent"),
+  h("span", {}, h("kbd", {}, "Ctrl"), "+", h("kbd", {}, "Space"), " suggest"),
+  h("span", {}, h("kbd", {}, "Ctrl"), "+", h("kbd", {}, "/"), " comment line"),
+  h("span", {}, h("kbd", {}, "Ctrl"), "+", h("kbd", {}, "Enter"), " run"),
+  h("span", {}, "Red wavy line = syntax error (hover the dot for details)"));
+
 function makeEditor(host, value, opts = {}) {
+  const editable = !opts.readOnly;
+  const python = (opts.mode || "python") === "python";
+  const toggleComment = c => c.toggleComment({ indent: true });
   const cm = CodeMirror(host, {
     value, mode: opts.mode || "python", lineNumbers: opts.lineNumbers ?? true, indentUnit: 4,
     tabSize: 4, viewportMargin: Infinity, readOnly: opts.readOnly || false, lineWrapping: false,
+    matchBrackets: true,
+    autoCloseBrackets: editable ? { pairs: "()[]{}''\"\"", explode: "()[]{}" } : false,
+    styleActiveLine: editable,
+    gutters: editable && python ? ["CodeMirror-linenumbers", "CodeMirror-lint-markers"] : ["CodeMirror-linenumbers"],
+    lint: editable && python ? { getAnnotations: pyLint, async: true, delay: 500, tooltips: true } : false,
     extraKeys: {
       Tab: c => c.somethingSelected() ? c.indentSelection("add") : c.replaceSelection("    ", "end"),
       "Shift-Tab": c => c.indentSelection("subtract"),
       "Ctrl-Enter": () => opts.onRun && opts.onRun(),
       "Cmd-Enter": () => opts.onRun && opts.onRun(),
+      "Ctrl-/": toggleComment, "Cmd-/": toggleComment,
+      "Ctrl-Space": c => editable && python && showHints(c),
     },
   });
+  if (editable && python) {
+    cm.on("inputRead", (c, change) => {
+      if (c.state.completionActive || change.origin !== "+input") return;
+      const ch = change.text[change.text.length - 1].slice(-1);
+      if (ch === ".") return showHints(c);
+      if (!/\w/.test(ch)) return;
+      const cur = c.getCursor(), line = c.getLine(cur.line);
+      let start = cur.ch; while (start > 0 && /\w/.test(line[start - 1])) start--;
+      if (cur.ch - start >= 2) showHints(c);
+    });
+    // re-check syntax once Python finishes loading
+    if (Engine.status !== "ready") Engine.start().then(() => cm.performLint && cm.performLint()).catch(() => {});
+  }
   liveEditors.push(cm);
   return cm;
 }
@@ -1298,6 +1490,7 @@ function viewPractice(m, body, onNext) {
     h("p", { class: "muted" }, "Fill in each function where it says TODO, then press Run checks. Work on one at a time; each ✗ tells you what went wrong. Click a check to jump to its code."));
   const host = h("div", { class: "codeblock editor-tall" }, h("div", { class: "bar-top" }, h("span", { class: "lang" }, `exercises.py · module ${m.id}`)));
   const edHost = h("div"); host.append(edHost);
+  host.append(editorHelp());
   const results = h("div", { class: "results" });
   const printed = h("pre", { class: "output", hidden: true });
   let cm;
@@ -1443,6 +1636,7 @@ function viewPlay() {
     ...Object.keys(PLAY_EXAMPLES).map(k => h("button", { class: "chip", type: "button", onclick: () => { cm.setValue(PLAY_EXAMPLES[k]); if (/input\(/.test(PLAY_EXAMPLES[k]) && !stdin.value) stdin.value = k === "Hello" ? "Sam" : "5\n7\n3"; } }, k)));
   const host = h("div", { class: "codeblock editor-tall" }, h("div", { class: "bar-top" }, h("span", { class: "lang" }, "main.py"), h("span", {}, "Ctrl+Enter to run")));
   const edHost = h("div"); host.append(edHost);
+  host.append(editorHelp());
   const stdin = h("textarea", { id: "play-stdin", placeholder: "One line per input() call" });
   const outEl = h("pre", { class: "output", style: "border:1px solid var(--line);border-radius:10px;min-height:80px" }, "Output appears here.");
   const run = async () => {

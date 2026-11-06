@@ -164,7 +164,8 @@ def build():
 
     data = gather()
     html = (APP / "template.html").read_text(encoding="utf-8")
-    css = (APP / "vendor" / "codemirror.css").read_text(encoding="utf-8") + "\n" + (APP / "styles.css").read_text(encoding="utf-8")
+    css = "\n".join((APP / "vendor" / f).read_text(encoding="utf-8")
+                    for f in ["codemirror.css", "show-hint.css", "lint.css"]) + "\n" + (APP / "styles.css").read_text(encoding="utf-8")
     js = (APP / "app.js").read_text(encoding="utf-8")
     payload = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
     html = (html.replace("/*__CSS__*/", css)
