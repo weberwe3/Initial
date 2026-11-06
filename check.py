@@ -4,7 +4,8 @@ check.py - the course's friendly test runner.
 Usage (from the top folder of the course):
 
     python check.py              # list every module and your progress
-    python check.py 3            # check your answers for module 03
+    python check.py 3            # check your answers for Python module 03
+    python check.py A5           # check your answers for AI-track module A05
     python check.py 3 --solutions   # check the official solutions instead
 
 You never need to edit this file. It loads your exercises.py, runs the
@@ -18,6 +19,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent
 MODULES = ROOT / "modules"
+AI_MODULES = ROOT / "ai"
 
 GREEN = "\033[92m"
 RED = "\033[91m"
@@ -43,7 +45,15 @@ def load(path, name):
 
 
 def find_module(number):
-    matches = sorted(MODULES.glob(f"{int(number):02d}_*"))
+    text = str(number).strip().upper()
+    if text.startswith("A"):
+        if not text[1:].isdigit():
+            return None
+        matches = sorted(AI_MODULES.glob(f"A{int(text[1:]):02d}_*"))
+    elif text.isdigit():
+        matches = sorted(MODULES.glob(f"{int(text):02d}_*"))
+    else:
+        return None
     return matches[0] if matches else None
 
 
@@ -96,9 +106,15 @@ def run_module(folder, use_solutions=False, quiet=False):
 
 
 def overview():
-    print(f"\n{BOLD}Python: Zero to Intermediate - your progress{RESET}\n")
-    for folder in sorted(MODULES.iterdir()):
-        if not folder.is_dir():
+    print(f"\n{BOLD}Python Foundry - your progress{RESET}")
+    folders = []
+    for title, root in [("Python track", MODULES), ("AI track", AI_MODULES)]:
+        if root.is_dir():
+            folders.append(title)
+            folders.extend(f for f in sorted(root.iterdir()) if f.is_dir())
+    for folder in folders:
+        if isinstance(folder, str):
+            print(f"\n  {BOLD}{folder}{RESET}")
             continue
         result = run_module(folder, quiet=True)
         if result is None:

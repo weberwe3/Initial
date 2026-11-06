@@ -23,16 +23,28 @@ APP = ROOT / "app"
 DIST = APP / "dist"
 sys.path.insert(0, str(APP))
 
-from learning_content import M  # noqa: E402
+from learning_content import M as M_PY  # noqa: E402
+from learning_content_ai import M_AI  # noqa: E402
+
+M = {**M_PY, **M_AI}
 
 PYODIDE_VERSION = "0.26.4"
 ENGINE_FILES = ["pyodide.js", "pyodide.asm.js", "pyodide.asm.wasm", "python_stdlib.zip", "pyodide-lock.json"]
 
-PARTS = [
-    ("Part 1 · Foundations", ["00", "01", "02", "03", "04", "05", "06"]),
-    ("Part 2 · Real programs", ["07", "08", "09", "10"]),
-    ("Part 3 · Intermediate", ["11", "12", "13", "14", "15"]),
+TRACKS = [
+    {"id": "python", "name": "Python", "long": "Python: zero to intermediate"},
+    {"id": "ai", "name": "AI", "long": "AI for business: zero to super user"},
 ]
+# (part name, module ids, track id)
+PARTS = [
+    ("Part 1 · Foundations", ["00", "01", "02", "03", "04", "05", "06"], "python"),
+    ("Part 2 · Real programs", ["07", "08", "09", "10"], "python"),
+    ("Part 3 · Intermediate", ["11", "12", "13", "14", "15"], "python"),
+    ("Part 1 · AI foundations", ["A00", "A01", "A02", "A03"], "ai"),
+    ("Part 2 · AI + Python for analytics", ["A04", "A05", "A06", "A07", "A08", "A09"], "ai"),
+    ("Part 3 · Super user & ambassador", ["A10", "A11", "A12"], "ai"),
+]
+TRACK_ROOTS = [("python", ROOT / "modules"), ("ai", ROOT / "ai")]
 
 
 def rewrite_links(md: str) -> str:
@@ -40,6 +52,9 @@ def rewrite_links(md: str) -> str:
     md = re.sub(r"\((?:\.\./)*modules/(\d\d)_[a-z_]+/lesson\.md\)", r"(#m-\1)", md)
     md = re.sub(r"\(\.\./(\d\d)_[a-z_]+/lesson\.md\)", r"(#m-\1)", md)
     md = re.sub(r"\((?:\.\./)*projects/0(\d)_[a-z_]+\.md\)", r"(#project-\1)", md)
+    md = re.sub(r"\((?:\.\./)*ai/(A\d\d)_[a-z_]+/lesson\.md\)", r"(#m-\1)", md)
+    md = re.sub(r"\(\.\./(A\d\d)_[a-z_]+/lesson\.md\)", r"(#m-\1)", md)
+    md = re.sub(r"\((?:\.\./)*projects/A_capstone\.md\)", "(#project-ai)", md)
     md = re.sub(r"\((?:\.\./)*cheatsheet\.md\)", "(#cheatsheet)", md)
     md = re.sub(r"\[`?data/`?\]\(data/\)", "`data/`", md)
     return md
@@ -52,7 +67,7 @@ def split_lesson(md: str):
     md = re.sub(r"^\*\*Checkpoint:\*\*(.*)$", r"> **Checkpoint:**\1", md, flags=re.M)
     lines = md.strip().splitlines()
     title_line = lines[0]
-    m = re.match(r"# Module \d\d: (.*)", title_line)
+    m = re.match(r"# Module A?\d\d: (.*)", title_line)
     title = m.group(1).strip() if m else title_line.lstrip("# ")
     chunks, current, current_title = [], [], None
     intro = []
@@ -101,12 +116,11 @@ def verify_outputs():
 
 def gather():
     modules = []
-    for folder in sorted((ROOT / "modules").iterdir()):
-        if not folder.is_dir():
-            continue
-        mid = folder.name[:2]
+    folders = [(track, f) for track, root in TRACK_ROOTS for f in sorted(root.iterdir()) if f.is_dir()]
+    for track, folder in folders:
+        mid = folder.name.split("_")[0]
         lesson = split_lesson((folder / "lesson.md").read_text(encoding="utf-8"))
-        entry = {"id": mid, "slug": folder.name, **lesson, "learn": M.get(mid, {})}
+        entry = {"id": mid, "slug": folder.name, "track": track, **lesson, "learn": M.get(mid, {})}
         cr = re.search(r"^\*\*Continue reading:\*\* \[([^\]]+)\]\((https?://[^)]+)\) \(([^)]+)\)\.\s*(.*)$",
                        (folder / "lesson.md").read_text(encoding="utf-8"), re.M)
         if cr:
@@ -129,14 +143,16 @@ def gather():
         modules.append(entry)
 
     projects = []
-    for p in sorted((ROOT / "projects").glob("0*.md")):
+    for p in sorted((ROOT / "projects").glob("*.md")):
         md = rewrite_links(p.read_text(encoding="utf-8"))
         md = re.sub(r"\[`?solutions/[^\]]*`?\]\([^)]*\)", "the `projects/solutions/` folder of the course repo", md)
         title = md.splitlines()[0].lstrip("# ").strip()
-        projects.append({"n": int(p.name[1]), "title": title, "md": md})
+        is_ai = p.name.startswith("A_")
+        projects.append({"n": "ai" if is_ai else str(int(p.name[1])), "track": "ai" if is_ai else "python",
+                         "title": title, "md": md})
 
     cheatsheet = rewrite_links((ROOT / "cheatsheet.md").read_text(encoding="utf-8"))
-    return {"modules": modules, "projects": projects, "cheatsheet": cheatsheet, "parts": PARTS,
+    return {"modules": modules, "projects": projects, "cheatsheet": cheatsheet, "parts": PARTS, "tracks": TRACKS,
             "pyodideVersion": PYODIDE_VERSION}
 
 

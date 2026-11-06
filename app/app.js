@@ -6,6 +6,12 @@
 const C = window.COURSE;
 const MODS = C.modules;
 const byId = Object.fromEntries(MODS.map(m => [m.id, m]));
+const TRACKS = C.tracks || [{ id: "python", name: "Python", long: "Python" }];
+const trackOf = id => (byId[id] && byId[id].track) || "python";
+const modsIn = track => MODS.filter(m => m.track === track);
+const partsIn = track => C.parts.filter(p => (p[2] || "python") === track);
+function savedTrack() { try { return localStorage.getItem("python-foundry-track") || "python"; } catch (_) { return "python"; } }
+function setTrack(t) { ui.track = t; try { localStorage.setItem("python-foundry-track", t); } catch (_) {} }
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 const DAY = 86400000;
@@ -719,14 +725,19 @@ function makeEditor(host, value, opts = {}) {
 function isRunnable(code) {
   if (/^\s*>>>/m.test(code) || /Traceback \(most recent/.test(code)) return false;
   if (/requests\.(get|post)\(|pip install|breakpoint\(\)|@app\./.test(code)) return false;
+  if (needsComputer(code)) return false;
   return true;
 }
+// Code that needs packages, network access or an API key the browser doesn't have
+const needsComputer = code => /^\s*(import|from)\s+(pandas|numpy|matplotlib|anthropic|openai|ayx|sklearn|openpyxl)\b/m.test(code)
+  || /\b(pd|np|plt)\.\w+\(|client\.messages\.|Alteryx\.(read|write)\(/.test(code);
 
 function codeBlock(code, { key = "play", cwd = "/course/play", support = null, lang = "python", runnable = true } = {}) {
   const wrap = h("div", { class: "codeblock" });
   const isPy = lang === "python";
   const canRun = isPy && runnable && isRunnable(code);
-  const top = h("div", { class: "bar-top" }, h("span", { class: "lang" }, isPy ? (canRun ? "python · editable" : "python") : (lang || "text")));
+  const label = isPy ? (canRun ? "python · editable" : needsComputer(code) ? "python · run on your computer" : "python") : (lang || "text");
+  const top = h("div", { class: "bar-top" }, h("span", { class: "lang" }, label));
   wrap.append(top);
   if (!isPy) {
     wrap.append(h("pre", { class: "static" }, code));
@@ -1215,8 +1226,8 @@ function stageDone(m, k) {
 }
 function modProgress(m) { const st = stagesFor(m); return st.filter(s => stageDone(m, s.k)).length / st.length; }
 const modComplete = m => modProgress(m) === 1;
-function nextStep() {
-  for (const m of MODS) {
+function nextStep(track = ui.track) {
+  for (const m of modsIn(track)) {
     const st = stagesFor(m).find(s => !stageDone(m, s.k));
     if (st) return { m, stage: st };
   }
@@ -1233,26 +1244,32 @@ function ring(frac, size = 22) {
 /* =====================================================================
    Views
    ===================================================================== */
-const ui = { stage: {}, review: null };
+const ui = { stage: {}, review: null, track: savedTrack() };
 
 function viewHome() {
   const v = []; const st = Store.state;
   const nxt = nextStep();
   const due = dueIds().length;
-  const done = MODS.filter(modComplete).length;
-  const exTotal = MODS.reduce((a, m) => a + (Store.mod(m.id).exTotal || 0), 0);
-  const exPassed = MODS.reduce((a, m) => a + (Store.mod(m.id).exPassed || 0), 0);
+  const tmods = modsIn(ui.track);
+  const tinfo = TRACKS.find(t => t.id === ui.track) || TRACKS[0];
+  const done = tmods.filter(modComplete).length;
+  const exTotal = tmods.reduce((a, m) => a + (Store.mod(m.id).exTotal || 0), 0);
+  const exPassed = tmods.reduce((a, m) => a + (Store.mod(m.id).exPassed || 0), 0);
+  const startedTrack = tmods.some(m => modProgress(m) > 0);
   const deck = Object.keys(st.srs).length;
   const streak = (() => { let n = 0, d = today(); if (!st.days.includes(d)) d--; while (st.days.includes(d)) { n++; d--; } return n; })();
 
   v.push(h("section", { class: "hero" },
     h("div", { class: "hero-main" },
-      h("div", { class: "eyebrow" }, st.updatedAt ? "Welcome back" : "Zero to intermediate · 16 modules"),
-      h("h1", {}, st.updatedAt ? "Pick up where you left off." : "Learn Python so it sticks."),
-      h("p", {}, st.updatedAt ? "Each module follows the same loop: guess, learn in small steps, rebuild, practise, recall, explain. Reviews bring old ideas back right before you'd forget them."
+      trackSwitch(),
+      h("div", { class: "eyebrow" }, `${tinfo.long} · ${tmods.length} modules`),
+      h("h1", {}, startedTrack ? "Pick up where you left off." : ui.track === "ai" ? "Become the AI expert your team relies on." : "Learn Python so it sticks."),
+      h("p", {}, ui.track === "ai"
+        ? "From no experience to AI super user at work: prompting, responsible use, AI-assisted analysis, Alteryx to Python, calling AI from code, text analytics, RAG, agents, and leading adoption as an AI ambassador."
+        : startedTrack ? "Each module follows the same loop: guess, learn in small steps, rebuild, practise, recall, explain. Reviews bring old ideas back right before you'd forget them."
         : "Real Python runs in your browser. Every module is built on memory research: retrieval, spacing, interleaving and prediction. The point is to still know it in six months."),
       h("div", { class: "row" },
-        nxt ? h("a", { class: "btn primary", href: `#m-${nxt.m.id}`, onclick: () => { ui.stage[nxt.m.id] = nxt.stage.k; } }, st.updatedAt ? `Continue: ${nxt.m.title} · ${nxt.stage.label}` : "Start Module 00") : h("span", { class: "callout good" }, "You've completed every module."),
+        nxt ? h("a", { class: "btn primary", href: `#m-${nxt.m.id}`, onclick: () => { ui.stage[nxt.m.id] = nxt.stage.k; } }, startedTrack ? `Continue: ${nxt.m.title} · ${nxt.stage.label}` : `Start Module ${tmods[0].id}`) : h("span", { class: "callout good" }, "You've completed every module in this track."),
         h("a", { class: "btn", href: "#science" }, "How it's designed"))),
     h("div", { class: "recall-card" },
       h("div", { class: "eyebrow", style: "color:inherit;opacity:.75" }, "Due for review today"),
@@ -1262,11 +1279,11 @@ function viewHome() {
       h("a", { class: "btn amber", href: "#review" }, due ? `Review ${plural(due, "card")}` : "Practice anyway"))));
 
   v.push(h("section", { class: "grid3" },
-    ...[[`${done}/${MODS.length}`, "modules complete"], [`${exPassed}/${exTotal || "–"}`, "exercises passing"], [streak, streak === 1 ? "day streak" : "day streak"], [deck, "cards in your deck"]]
+    ...[[`${done}/${tmods.length}`, "modules complete"], [`${exPassed}/${exTotal || "–"}`, "exercises passing"], [streak, streak === 1 ? "day streak" : "day streak"], [deck, "cards in your deck"]]
       .map(([v1, k]) => h("div", { class: "panel flat stat" }, h("span", { class: "v num" }, v1), h("span", { class: "k" }, k)))));
 
   // memory strength + calibration
-  const strengthRows = MODS.map(m => [m, memoryStrength(m.id)]).filter(([, s]) => s != null);
+  const strengthRows = tmods.map(m => [m, memoryStrength(m.id)]).filter(([, s]) => s != null);
   const cal = ["sure", "unsure", "guess"].map(c => { const xs = st.calib.filter(x => x.c === c); return [c, xs.length, xs.length ? xs.filter(x => x.ok).length / xs.length : null]; });
   v.push(h("section", { class: "grid2" },
     h("div", { class: "panel" },
@@ -1299,8 +1316,8 @@ function viewHome() {
     h("div", { class: "panel" }, h("h3", {}, "Your last 8 weeks"), h("p", { class: "muted", style: "margin:4px 0 14px" }, "Short, frequent sessions beat long, rare ones. Aim for most days."), heat),
     h("div", { class: "panel" }, h("h3", {}, "Your study plan"), h("p", { class: "muted", style: "margin:4px 0 14px" }, "People who decide when and where they'll study follow through far more often."), planEl, sentence)));
 
-  // course map
-  C.parts.forEach(([name, ids]) => {
+  // course map (current track)
+  partsIn(ui.track).forEach(([name, ids]) => {
     v.push(h("section", {}, h("div", { class: "eyebrow", style: "margin-bottom:10px" }, name),
       h("div", { class: "module-cards" }, ...ids.map(id => {
         const m = byId[id], p = modProgress(m);
@@ -1686,24 +1703,36 @@ function viewDoc(md, eyebrow) {
 /* =====================================================================
    Sidebar, router, boot
    ===================================================================== */
+function trackSwitch() {
+  return h("div", { class: "track-switch", role: "tablist", "aria-label": "Learning track" },
+    ...TRACKS.map(t => h("button", {
+      type: "button", role: "tab", "aria-selected": String(ui.track === t.id), class: ui.track === t.id ? "on" : "",
+      onclick: () => { setTrack(t.id); const r = location.hash.slice(1); if (r.startsWith("m-") || r.startsWith("project-")) location.hash = "home"; else render(); },
+    }, t.id === "ai" ? "AI for business" : "Python")));
+}
+
 function renderSidebar() {
   const nav = $("#nav"); nav.innerHTML = "";
   const cur = location.hash.slice(1) || "home";
+  nav.append(trackSwitch());
   const link = (href, label, extra) => h("a", { class: "nav-link" + (cur === href ? " active" : ""), href: "#" + href }, h("span", { class: "ntitle" }, label), extra || null);
   const due = dueIds().length;
   nav.append(link("home", "Dashboard"), link("review", "Review", due ? h("span", { class: "nav-badge num" }, due) : null), link("play", "Playground"));
-  C.parts.forEach(([name, ids]) => {
+  partsIn(ui.track).forEach(([name, ids]) => {
     nav.append(h("div", { class: "nav-group" }, name));
     ids.forEach(id => nav.append(h("a", { class: "nav-link" + (cur === "m-" + id ? " active" : ""), href: "#m-" + id },
       h("span", { class: "nid" }, id), h("span", { class: "ntitle" }, byId[id].title), ring(modProgress(byId[id]), 18))));
   });
   nav.append(h("div", { class: "nav-group" }, "Projects"));
-  C.projects.forEach(p => nav.append(link("project-" + p.n, p.title.replace(/^(Checkpoint Project \d|Capstone):\s*/, (m0) => m0.startsWith("Cap") ? "Capstone: " : `${p.n}. `))));
+  C.projects.filter(p => (p.track || "python") === ui.track).forEach(p => nav.append(link("project-" + p.n,
+    p.title.replace(/^AI Track Capstone:\s*/, "Capstone: ").replace(/^(Checkpoint Project \d|Capstone):\s*/, (m0) => m0.startsWith("Cap") ? "Capstone: " : `${p.n}. `))));
   nav.append(h("div", { class: "nav-group" }, "Reference"), link("cheatsheet", "Cheatsheet"), link("notebook", "My notebook"), link("science", "How it's designed"));
 }
 
 function render() {
   const route = location.hash.slice(1) || "home";
+  if (route.startsWith("m-") && byId[route.slice(2)] && trackOf(route.slice(2)) !== ui.track) setTrack(trackOf(route.slice(2)));
+  if (route.startsWith("project-")) { const pj = C.projects.find(x => "project-" + x.n === route); if (pj && (pj.track || "python") !== ui.track) setTrack(pj.track || "python"); }
   liveEditors = [];
   const view = $("#view"); view.innerHTML = "";
   let nodes, crumb;

@@ -1,11 +1,15 @@
-# Python: Zero to Intermediate
+# Python Foundry
 
-A hands-on course that takes you from **never having written code** to
-**writing real, useful Python programs**: scripts that automate boring work,
-handle files and data, talk to web APIs, and come with their own tests.
+Two hands-on learning tracks, built on the science of memory:
 
-No prior experience assumed. No math beyond arithmetic. You need a computer and
-roughly **4–6 hours a week**. At that pace the course takes about **12 weeks**.
+| Track | From → to | Length |
+|-------|-----------|--------|
+| **[Python](#the-roadmap)** | Never written code → writing real, tested Python programs | 16 modules, ~12 weeks |
+| **[AI for business](#the-ai-track-zero-to-ai-super-user)** | No AI experience → AI super user and AI ambassador at work, including Python + AI for business analytics | 13 modules + capstone, ~10–12 weeks |
+
+No prior experience assumed. You need a computer and roughly **4–6 hours a
+week** per track. The tracks work on their own or side by side; the AI track's
+Python-heavy modules (A05–A10) are easier after Python modules 00–09.
 
 ---
 
@@ -14,6 +18,8 @@ roughly **4–6 hours a week**. At that pace the course takes about **12 weeks**
 Open **`python-foundry.html`** in your browser (double-click it). You get the
 whole course as an app with real Python running in the page. Nothing to install.
 
+- **Two tracks:** switch between Python and AI for business at the top of the
+  sidebar. Progress, reviews and search cover both.
 - **Six-stage loop per module:** guess first → short lesson steps with runnable
   examples → Parsons puzzle → coding exercises with instant checks → recall quiz
   → explain it in your own words.
@@ -106,7 +112,65 @@ that matches what *you* want Python for (see below).
 
 ---
 
-## Continue reading
+## The AI track: zero to AI super user
+
+Designed for analysts and AI ambassadors: from "what is an LLM?" to leading AI
+adoption on a team, with the intersection of **Python and AI for business
+analytics** at its core (including a module that maps Alteryx tools to Python).
+Exercises run offline in the browser; code that needs an API key or pandas is
+marked "run on your computer".
+
+Check AI-track exercises with `python check.py A5` (module A05), and so on.
+
+### Part 1: AI foundations
+| # | Module | You'll be able to… |
+|---|--------|--------------------|
+| A00 | [What AI Actually Is](ai/A00_what_is_ai/lesson.md) | Understand what today's AI is, how large language models work, and what they're good and bad at, well enough to explain it to your team. |
+| A01 | [Prompting Fundamentals](ai/A01_prompting/lesson.md) | Write prompts that get useful, consistent, checkable results the first time, and know how to fix them when they don't. |
+| A02 | [AI Tools at Work](ai/A02_ai_tools_at_work/lesson.md) | Know the landscape of AI tools, choose the right one for a task, and build a repeatable set of AI-assisted workflows for business analysis. |
+| A03 | [Responsible AI & Data Governance](ai/A03_responsible_ai/lesson.md) | Use AI safely with company data, recognise the main risks, and set guardrails your team can follow. |
+
+### Part 2: AI + Python for business analytics
+| # | Module | You'll be able to… |
+|---|--------|--------------------|
+| A04 | [AI-Assisted Data Analysis](ai/A04_ai_assisted_analysis/lesson.md) | Use AI to speed up every stage of an analysis (framing, exploring, coding, explaining) while keeping the numbers trustworthy. |
+| A05 | [From Alteryx to Python](ai/A05_alteryx_to_python/lesson.md) | Translate the Alteryx tools you use every day into Python, so you can read, write and AI-generate Python with confidence, and combine both in one workflow. |
+| A06 | [pandas for Business Analytics](ai/A06_pandas_analytics/lesson.md) | Do everyday analyst work in pandas (load, clean, reshape, summarise, chart and export) and know it well enough to check AI-written pandas code. |
+| A07 | [Calling AI from Python](ai/A07_llm_apis/lesson.md) | Call an LLM from Python, get structured answers back, and run AI over every row of a dataset reliably, safely and within budget. |
+| A08 | [AI Text Analytics & Evaluation](ai/A08_text_analytics_evals/lesson.md) | Turn piles of free text (survey comments, tickets, reviews, call notes) into numbers a business can act on, and prove the AI's labels are accurate enough to trust. |
+| A09 | [Chat with Your Documents (RAG)](ai/A09_rag_documents/lesson.md) | Understand retrieval-augmented generation (how AI answers questions from your company's documents with citations) well enough to build a small version and evaluate vendor tools. |
+
+### Part 3: AI super user & ambassador
+| # | Module | You'll be able to… |
+|---|--------|--------------------|
+| A10 | [Agents & Automation](ai/A10_agents_automation/lesson.md) | Understand how AI agents work (models using tools in a loop), when to use them instead of a simple workflow, and how to keep them safe. |
+| A11 | [The AI Ambassador Playbook](ai/A11_ambassador_playbook/lesson.md) | Lead AI adoption on your team: find and prioritise use cases, measure value, teach colleagues, manage risk, and communicate results to leadership. |
+| A12 | [Your AI Career](ai/A12_ai_career/lesson.md) | Turn this curriculum into career capital: a clear target role, a portfolio that proves your skills, and a story that positions you for AI-related positions. |
+
+**AI capstone:** [Customer-feedback insights pipeline](projects/A_capstone.md):
+label design, a gold set, a baseline vs an AI classifier, an evaluated pipeline,
+a governance note, and an ambassador pack for leadership.
+
+### AI track reading list
+| # | Module | Read next |
+|---|--------|-----------|
+| A00 | What AI Actually Is | [Large Language Models explained briefly](https://www.3blue1brown.com/lessons/mini-llm/) · 3Blue1Brown |
+| A01 | Prompting Fundamentals | [Prompt engineering overview](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/overview) · Anthropic's Claude documentation |
+| A02 | AI Tools at Work | [One Useful Thing](https://www.oneusefulthing.org/) · Ethan Mollick, Wharton |
+| A03 | Responsible AI & Data Governance | [AI Risk Management Framework](https://www.nist.gov/itl/ai-risk-management-framework) · NIST |
+| A04 | AI-Assisted Data Analysis | [Reduce hallucinations](https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/reduce-hallucinations) · Anthropic's Claude documentation |
+| A05 | From Alteryx to Python | [Python Tool](https://help.alteryx.com/current/en/designer/tools/developer/python-tool.html) · Alteryx Designer documentation |
+| A06 | pandas for Business Analytics | [Python for Data Analysis, 3rd edition](https://wesmckinney.com/book/) · Wes McKinney, the creator of pandas |
+| A07 | Calling AI from Python | [Get started with Claude](https://platform.claude.com/docs/en/get-started) · Anthropic's Claude documentation |
+| A08 | AI Text Analytics & Evaluation | [Classification: accuracy, recall, precision, and related metrics](https://developers.google.com/machine-learning/crash-course/classification/accuracy-precision-recall) · Google Machine Learning Crash Course |
+| A09 | Chat with Your Documents (RAG) | [Contextual retrieval](https://www.anthropic.com/research/contextual-retrieval) · Anthropic |
+| A10 | Agents & Automation | [Building effective AI agents](https://www.anthropic.com/research/building-effective-agents) · Anthropic |
+| A11 | The AI Ambassador Playbook | [The State of AI](https://www.mckinsey.com/capabilities/quantumblack/our-insights/the-state-of-ai) · McKinsey Global Survey |
+| A12 | Your AI Career | [AI Engineer Roadmap](https://roadmap.sh/ai-engineer) · roadmap.sh |
+
+---
+
+## Continue reading (Python track)
 
 One hand-picked, free resource per module for going deeper. The same link
 appears at the end of each lesson.
