@@ -13,13 +13,55 @@ Python-heavy modules (A05–A10) are easier after Python modules 00–09.
 
 ---
 
+## Recommended order (start here)
+
+Take the two tracks **together, interleaved**, in the order below. The app
+shows this as the **Path** view (its default) and marks where you are. Every
+module also says when something it builds on isn't finished yet.
+
+| Phase | When | Steps, in order | Why this order |
+|-------|------|-----------------|----------------|
+| **1. Orientation & first wins** | Weeks 1–2 | AI A00 What AI Actually Is<br>Py 00 Setup<br>AI A01 Prompting Fundamentals<br>AI A02 AI Tools at Work | Start with AI you can use at work tomorrow: early, visible payoffs keep motivation high. Python is installed in parallel so coding can start next phase. |
+| **2. Use AI safely; write your first code** | Weeks 3–5 | AI A03 Responsible AI & Data Governance<br>Py 01 First Steps<br>Py 02 Strings (Working with Text)<br>Py 03 Decisions<br>Py 04 Loops | Guardrails come before any work data touches an AI tool. Python basics are spread over three weeks so each idea gets practice and review before the next one arrives. |
+| **3. Data in Python + AI-assisted analysis** | Weeks 6–8 | Py 05 Lists & Tuples<br>Py 06 Dictionaries & Sets<br>AI A04 AI-Assisted Data Analysis<br>★ Project: Your First Real Programs | A04's exercises use lists and dictionaries, so those come first. Project 1 consolidates everything so far, and building from memory is retrieval practice at its strongest. |
+| **4. Lead early; write real programs** | Weeks 9–11 | AI A12 The AI Ambassador Playbook<br>Py 07 Functions<br>Py 08 Errors & Debugging<br>AI A05 From Alteryx to Python | You're already an AI ambassador, so the playbook comes early: start a pilot now and let it run while you learn. A05 (Alteryx to Python) needs functions (07) and benefits from error handling (08). |
+| **5. Files, packages and pandas** | Weeks 12–14 | Py 09 Files & Data<br>Py 10 Modules, Packages & pip<br>AI A06 pandas for Business Analytics<br>★ Project: Personal Expense Tracker | pandas runs in a virtual environment (10) and reads files (09). Project 2 is the best consolidation of Python Part 2 and a strong portfolio piece. |
+| **6. AI from code** | Weeks 15–17 | Py 11 Pythonic Code<br>Py 14 Working with the Web<br>AI A07 Calling AI from Python<br>AI A08 AI Text Analytics & Evaluation | Calling AI from Python uses comprehensions (11) and web/API skills (14). Evaluation (A08) follows straight away, so you never put unmeasured AI into a workflow. |
+| **7. Advanced patterns** | Weeks 18–21 | Py 12 Classes & Objects<br>Py 13 Testing<br>AI A09 Chat with Your Documents (RAG)<br>Py 15 Intermediate Power Tools<br>AI A10 Agents & Automation<br>AI A11 MCP & Skills | Classes and tests make bigger programs reliable. Decorators (15) are exactly what @mcp.tool() uses, so they come right before agents, MCP and Skills. |
+| **8. Prove it and position yourself** | Weeks 22–26 | ★ Project: Customer-Feedback Insights Pipeline<br>AI A13 Your AI Career<br>★ Project: Build Your Own Tool | The AI capstone ties every skill into portfolio evidence, and the career module turns it into your next role. The Python capstone is optional if your AI capstone meets its checklist. |
+
+**Why interleave instead of doing one track, then the other?**
+- **Prerequisites first.** Each module comes after what it builds on, so new
+  material lands on secure foundations: lower cognitive load and better retention.
+  The build checks this automatically: it refuses an order that breaks a prerequisite.
+- **Spacing and interleaving for free.** Alternating Python and AI spreads each
+  track's sessions over time and mixes the kinds of problems you solve, two of
+  the best-supported ways to make learning last.
+- **Relevance early.** AI skills you can use at work this week come first, and
+  the ambassador playbook arrives in Phase 4 so you can start a pilot while you
+  learn. Seeing a skill pay off in your own job measurably raises interest and results.
+- **Consolidation at phase ends.** Projects make you rebuild what you learned
+  from memory, which is retrieval practice at its strongest.
+
+**Your weekly rhythm (5–6 hours):** 3–4 sessions of 60–90 minutes. Start every
+session with your due reviews (5–10 minutes), then continue the next step on the
+path. Little and often beats long and rare. At 8–10 hours a week the path takes
+about 16 weeks.
+
+**Only want one track?** Python alone works top to bottom. The AI track alone
+works for modules A00–A03 and A12–A13; for A04–A11, do the Python modules
+listed under "Best after" in the app first.
+
+---
+
 ## ✨ The interactive version (recommended)
 
 Open **`python-foundry.html`** in your browser (double-click it). You get the
 whole course as an app with real Python running in the page. Nothing to install.
 
-- **Two tracks:** switch between Python and AI for business at the top of the
-  sidebar. Progress, reviews and search cover both.
+- **Two tracks and a recommended path:** the default Path view interleaves both
+  tracks in the order above; switch to Python or AI to see one track at a time.
+  Progress, reviews and search cover everything.
 - **Six-stage loop per module:** guess first → short lesson steps with runnable
   examples → Parsons puzzle → coding exercises with instant checks → recall quiz
   → explain it in your own words.

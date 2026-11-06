@@ -10,7 +10,13 @@ const TRACKS = C.tracks || [{ id: "python", name: "Python", long: "Python" }];
 const trackOf = id => (byId[id] && byId[id].track) || "python";
 const modsIn = track => MODS.filter(m => m.track === track);
 const partsIn = track => C.parts.filter(p => (p[2] || "python") === track);
-function savedTrack() { try { return localStorage.getItem("python-foundry-track") || "python"; } catch (_) { return "python"; } }
+function savedTrack() { try { return localStorage.getItem("python-foundry-track") || "path"; } catch (_) { return "path"; } }
+const PATH = C.path || [];
+const PREREQS = C.prereqs || {};
+const PATH_STEPS = PATH.flatMap((ph, pi) => ph.steps.map(step => ({ step, phase: pi })));
+const projectByRoute = r => C.projects.find(x => "project-" + x.n === r);
+const stepLabel = step => step.startsWith("project-") ? (projectByRoute(step)?.title || step) : `${byId[step].title}`;
+const stepTag = step => step.startsWith("project-") ? "Project" : (trackOf(step) === "ai" ? "AI" : "Python");
 function setTrack(t) { ui.track = t; try { localStorage.setItem("python-foundry-track", t); } catch (_) {} }
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
@@ -61,6 +67,7 @@ const defaultState = () => ({
   plan: { days: "Mon, Wed, Fri", time: "7:30 pm", place: "at my desk", minutes: 150 },
   play: "",          // playground code
   predict: true,
+  projects: {},      // project routes marked done
   predictions: { made: 0, right: 0 },
 });
 
@@ -1205,6 +1212,9 @@ const SCIENCE = [
   { k: "A", name: "Advance organisers", what: "A short overview of the key idea before a lesson gives new details a structure to attach to.",
     here: "Each module starts with 'The big idea' and a map of the steps ahead.",
     cite: "Ausubel (1960), Journal of Educational Psychology." },
+  { k: "O", name: "Sequencing: prerequisites, alternation, early relevance", what: "The order you learn in matters. New material is easiest to absorb when what it builds on is already secure (it lowers cognitive load); alternating between related subjects spaces out each one and mixes problem types; and seeing how a topic pays off in your own work raises both interest and performance.",
+    here: "The recommended path interleaves the Python and AI tracks in eight phases. Every module comes after its prerequisites (checked automatically when the course is built), AI skills you can use at work come first, and each phase ends with consolidation. Modules tell you when a prerequisite isn't finished yet.",
+    cite: "Sweller (1988) on cognitive load; Rohrer & Taylor (2007) and Cepeda et al. (2006) on interleaving and spacing; Hulleman & Harackiewicz (2009), Science, on relevance (utility value)." },
   { k: "G", name: "Implementation intentions", what: "Planning exactly when and where you will act ('When it's 7:30 on Monday, I'll study at my desk') makes you far more likely to follow through.",
     here: "Your dashboard asks you to set a concrete study plan and shows your activity streak against it.",
     cite: "Gollwitzer (1999), American Psychologist; Gollwitzer & Sheeran (2006) meta-analysis." },
@@ -1227,11 +1237,30 @@ function stageDone(m, k) {
 function modProgress(m) { const st = stagesFor(m); return st.filter(s => stageDone(m, s.k)).length / st.length; }
 const modComplete = m => modProgress(m) === 1;
 function nextStep(track = ui.track) {
+  if (track === "path") {
+    for (const { step } of PATH_STEPS) {
+      if (step.startsWith("project-")) { if (!projectDone(step)) return { project: projectByRoute(step), route: step }; continue; }
+      const m = byId[step]; const st = stagesFor(m).find(s => !stageDone(m, s.k));
+      if (st) return { m, stage: st, route: "m-" + m.id };
+    }
+    return null;
+  }
   for (const m of modsIn(track)) {
     const st = stagesFor(m).find(s => !stageDone(m, s.k));
-    if (st) return { m, stage: st };
+    if (st) return { m, stage: st, route: "m-" + m.id };
   }
   return null;
+}
+const projectDone = route => !!(Store.state.projects || {})[route];
+const stepDone = step => step.startsWith("project-") ? projectDone(step) : modComplete(byId[step]);
+const missingPrereqs = id => (PREREQS[id] || []).filter(r => !modComplete(byId[r]));
+const pathPosition = step => PATH_STEPS.findIndex(x => x.step === step);
+function nextPathRoute(fromStep) {
+  const i = pathPosition(fromStep);
+  for (let k = i + 1; k < PATH_STEPS.length; k++) if (!stepDone(PATH_STEPS[k].step)) {
+    const s = PATH_STEPS[k].step; return s.startsWith("project-") ? s : "m-" + s;
+  }
+  return "home";
 }
 function ring(frac, size = 22) {
   const r = (size - 4) / 2, c = 2 * Math.PI * r;
@@ -1250,8 +1279,9 @@ function viewHome() {
   const v = []; const st = Store.state;
   const nxt = nextStep();
   const due = dueIds().length;
-  const tmods = modsIn(ui.track);
-  const tinfo = TRACKS.find(t => t.id === ui.track) || TRACKS[0];
+  const isPath = ui.track === "path";
+  const tmods = isPath ? MODS : modsIn(ui.track);
+  const tinfo = isPath ? { long: "Recommended path · both tracks interleaved" } : (TRACKS.find(t => t.id === ui.track) || TRACKS[0]);
   const done = tmods.filter(modComplete).length;
   const exTotal = tmods.reduce((a, m) => a + (Store.mod(m.id).exTotal || 0), 0);
   const exPassed = tmods.reduce((a, m) => a + (Store.mod(m.id).exPassed || 0), 0);
@@ -1262,14 +1292,18 @@ function viewHome() {
   v.push(h("section", { class: "hero" },
     h("div", { class: "hero-main" },
       trackSwitch(),
-      h("div", { class: "eyebrow" }, `${tinfo.long} · ${tmods.length} modules`),
-      h("h1", {}, startedTrack ? "Pick up where you left off." : ui.track === "ai" ? "Become the AI expert your team relies on." : "Learn Python so it sticks."),
-      h("p", {}, ui.track === "ai"
+      h("div", { class: "eyebrow" }, isPath ? `${tinfo.long} · ${PATH_STEPS.length} steps · about 26 weeks` : `${tinfo.long} · ${tmods.length} modules`),
+      h("h1", {}, startedTrack ? "Pick up where you left off." : isPath ? "Python and AI, in the order that sticks." : ui.track === "ai" ? "Become the AI expert your team relies on." : "Learn Python so it sticks."),
+      h("p", {}, isPath
+        ? "One route through both tracks. Each step comes after what it builds on, the tracks alternate so each topic is spaced out and mixed with the other, and AI wins you can use at work come early."
+        : ui.track === "ai"
         ? "From no experience to AI super user at work: prompting, responsible use, AI-assisted analysis, Alteryx to Python, calling AI from code, text analytics, RAG, agents, MCP and Skills, and leading adoption as an AI ambassador."
         : startedTrack ? "Each module follows the same loop: guess, learn in small steps, rebuild, practise, recall, explain. Reviews bring old ideas back right before you'd forget them."
         : "Real Python runs in your browser. Every module is built on memory research: retrieval, spacing, interleaving and prediction. The point is to still know it in six months."),
       h("div", { class: "row" },
-        nxt ? h("a", { class: "btn primary", href: `#m-${nxt.m.id}`, onclick: () => { ui.stage[nxt.m.id] = nxt.stage.k; } }, startedTrack ? `Continue: ${nxt.m.title} · ${nxt.stage.label}` : `Start Module ${tmods[0].id}`) : h("span", { class: "callout good" }, "You've completed every module in this track."),
+        nxt ? h("a", { class: "btn primary", href: "#" + nxt.route, onclick: () => { if (nxt.m) ui.stage[nxt.m.id] = nxt.stage.k; } },
+          nxt.project ? `Next: ${nxt.project.title}` : startedTrack ? `Continue: ${nxt.m.title} · ${nxt.stage.label}` : `Start: Module ${nxt.m.id} · ${nxt.m.title}`)
+          : h("span", { class: "callout good" }, isPath ? "You've completed the whole path." : "You've completed every module in this track."),
         h("a", { class: "btn", href: "#science" }, "How it's designed"))),
     h("div", { class: "recall-card" },
       h("div", { class: "eyebrow", style: "color:inherit;opacity:.75" }, "Due for review today"),
@@ -1279,7 +1313,7 @@ function viewHome() {
       h("a", { class: "btn amber", href: "#review" }, due ? `Review ${plural(due, "card")}` : "Practice anyway"))));
 
   v.push(h("section", { class: "grid3" },
-    ...[[`${done}/${tmods.length}`, "modules complete"], [`${exPassed}/${exTotal || "–"}`, "exercises passing"], [streak, streak === 1 ? "day streak" : "day streak"], [deck, "cards in your deck"]]
+    ...[[isPath ? `${PATH_STEPS.filter(x => stepDone(x.step)).length}/${PATH_STEPS.length}` : `${done}/${tmods.length}`, isPath ? "path steps complete" : "modules complete"], [`${exPassed}/${exTotal || "–"}`, "exercises passing"], [streak, streak === 1 ? "day streak" : "day streak"], [deck, "cards in your deck"]]
       .map(([v1, k]) => h("div", { class: "panel flat stat" }, h("span", { class: "v num" }, v1), h("span", { class: "k" }, k)))));
 
   // memory strength + calibration
@@ -1316,7 +1350,36 @@ function viewHome() {
     h("div", { class: "panel" }, h("h3", {}, "Your last 8 weeks"), h("p", { class: "muted", style: "margin:4px 0 14px" }, "Short, frequent sessions beat long, rare ones. Aim for most days."), heat),
     h("div", { class: "panel" }, h("h3", {}, "Your study plan"), h("p", { class: "muted", style: "margin:4px 0 14px" }, "People who decide when and where they'll study follow through far more often."), planEl, sentence)));
 
-  // course map (current track)
+  // course map (current track or the recommended path)
+  if (isPath) {
+    const curStep = nxt ? (nxt.project ? nxt.route : nxt.m.id) : null;
+    const curPhase = curStep ? PATH_STEPS[pathPosition(curStep)].phase : PATH.length;
+    const phaseEls = [h("div", { class: "spread" },
+      h("div", {}, h("div", { class: "eyebrow" }, "Your recommended path"), h("h2", {}, "8 phases, about 26 weeks at 5–6 hours a week")),
+      h("a", { class: "btn small ghost", href: "#science" }, "Why this order?"))];
+    PATH.forEach((ph, pi) => {
+      const doneN = ph.steps.filter(stepDone).length;
+      phaseEls.push(h("section", { class: "phase" + (pi === curPhase ? " current" : "") },
+        h("div", { class: "phase-head" },
+          h("span", { class: "phase-num" }, pi + 1),
+          h("div", { style: "flex:1;min-width:0" },
+            h("div", { class: "eyebrow" }, `${ph.weeks}${pi === curPhase ? " · you are here" : doneN === ph.steps.length ? " · done" : ""}`),
+            h("h3", {}, ph.name)),
+          h("span", { class: "muted num" }, `${doneN}/${ph.steps.length}`)),
+        h("p", { class: "phase-why" }, ph.why),
+        h("div", { class: "module-cards" }, ...ph.steps.map(step => {
+          const isProj = step.startsWith("project-");
+          const m = isProj ? null : byId[step];
+          return h("a", { class: "mcard" + (step === curStep ? " next" : ""), href: "#" + (isProj ? step : "m-" + step) },
+            h("div", { class: "spread" }, h("span", { class: "mid" }, isProj ? "Project" : `${stepTag(step)} · ${step}`),
+              isProj ? h("span", { class: projectDone(step) ? "check done" : "check" }, projectDone(step) ? "✓" : "") : ring(modProgress(m))),
+            h("span", { class: "mt" }, stepLabel(step).replace(/^(Checkpoint Project \d|Capstone|AI Track Capstone):\s*/, "")),
+            h("span", { class: "muted", style: "font-size:14px" }, isProj ? "Build it to consolidate the phase" : (m.learn.big_idea || m.goal)));
+        }))));
+    });
+    v.splice(2, 0, ...phaseEls);   // right after the hero and stats: the order is the first thing you see
+    return v;
+  }
   partsIn(ui.track).forEach(([name, ids]) => {
     v.push(h("section", {}, h("div", { class: "eyebrow", style: "margin-bottom:10px" }, name),
       h("div", { class: "module-cards" }, ...ids.map(id => {
@@ -1324,7 +1387,8 @@ function viewHome() {
         return h("a", { class: "mcard" + (nxt && nxt.m.id === id ? " next" : ""), href: `#m-${id}` },
           h("div", { class: "spread" }, h("span", { class: "mid" }, `Module ${id}`), ring(p)),
           h("span", { class: "mt" }, m.title),
-          h("span", { class: "muted", style: "font-size:14px" }, m.learn.big_idea || m.goal));
+          h("span", { class: "muted", style: "font-size:14px" }, m.learn.big_idea || m.goal),
+          missingPrereqs(id).length && modProgress(m) < 1 ? h("span", { class: "prereq-chip" }, "Best after: " + missingPrereqs(id).join(", ")) : null);
       }))));
   });
   return v;
@@ -1343,6 +1407,17 @@ function viewModule(mid) {
     h("h1", {}, m.title),
     m.goal && h("p", { class: "goal", html: inlineMd(m.goal[0].toUpperCase() + m.goal.slice(1) + (m.time ? ` · ${m.time}` : "")) }),
     m.learn.big_idea && h("div", { class: "callout" }, h("div", { class: "eyebrow", style: "color:var(--amber)" }, "The big idea"), h("div", { style: "font-size:1.08rem;margin-top:4px" }, m.learn.big_idea))));
+  const pos = pathPosition(mid);
+  const missing = missingPrereqs(mid);
+  if (pos >= 0) {
+    const ph = PATH[PATH_STEPS[pos].phase];
+    out.push(h("div", { class: "path-note" + (missing.length ? " warn" : "") },
+      h("div", {}, h("strong", {}, `Recommended path: step ${pos + 1} of ${PATH_STEPS.length}`), ` · Phase ${PATH_STEPS[pos].phase + 1}, ${ph.name} (${ph.weeks})`),
+      missing.length
+        ? h("div", {}, "Best after: ", ...missing.flatMap((r, i) => [i ? ", " : "", h("a", { href: "#m-" + r }, `${r} ${byId[r].title}`)]),
+            ". You can start now, but this module builds on those, so it will feel easier and stick better after them.")
+        : null));
+  }
   const bar = h("nav", { class: "stages", "aria-label": "Module stages" });
   stages.forEach((s, i) => bar.append(h("button", {
     class: "stage" + (s.k === stage ? " on" : "") + (stageDone(m, s.k) ? " done" : ""), type: "button",
@@ -1483,8 +1558,9 @@ function viewModule(mid) {
           let added = 0; (m.learn.cards || []).forEach((_, k) => { if (addToDeck(`c-${mid}-${k}`)) added++; });
           Store.studied(); Store.save(); renderSidebar();
           toast(added ? `${plural(added, "flashcard")} added to your deck. First review tomorrow.` : "Module complete");
-          const nx = MODS[MODS.indexOf(m) + 1];
-          if (nx) location.hash = "m-" + nx.id; else location.hash = "home";
+          if (ui.track === "path") { location.hash = nextPathRoute(mid); return; }
+          const inTrack = modsIn(m.track); const nx = inTrack[inTrack.indexOf(m) + 1];
+          location.hash = nx ? "m-" + nx.id : "home";
         } }, "Complete module →")),
       reveal);
     if (m.read) body.append(readingCard(m.read));
@@ -1700,15 +1776,32 @@ function viewDoc(md, eyebrow) {
   return [h("div", { class: "eyebrow" }, eyebrow), h("section", { class: "panel" }, renderMd(md, { runnable: false }))];
 }
 
+function viewProject(p) {
+  const route = "project-" + p.n;
+  const pos = pathPosition(route);
+  const done = projectDone(route);
+  const bar = h("section", { class: "panel flat spread" },
+    h("div", {}, h("strong", {}, done ? "Marked as done ✓" : "When you've built it, mark it done"),
+      pos >= 0 ? h("div", { class: "muted" }, `Recommended path: step ${pos + 1} of ${PATH_STEPS.length} · Phase ${PATH_STEPS[pos].phase + 1}, ${PATH[PATH_STEPS[pos].phase].name}`) : null),
+    h("div", { class: "row" },
+      h("button", { class: "btn" + (done ? "" : " primary"), type: "button", onclick: () => {
+        Store.state.projects = { ...(Store.state.projects || {}), [route]: !done };
+        Store.studied(); Store.save(); render();
+        if (!done) toast("Project marked done. Explaining what you built to someone is the best review.");
+      } }, done ? "Mark as not done" : "Mark project done"),
+      ui.track === "path" && done ? h("a", { class: "btn primary", href: "#" + nextPathRoute(route) }, "Next on your path →") : null));
+  return [h("div", { class: "eyebrow" }, "Project"), bar, h("section", { class: "panel" }, renderMd(p.md, { runnable: false }))];
+}
+
 /* =====================================================================
    Sidebar, router, boot
    ===================================================================== */
 function trackSwitch() {
   return h("div", { class: "track-switch", role: "tablist", "aria-label": "Learning track" },
-    ...TRACKS.map(t => h("button", {
-      type: "button", role: "tab", "aria-selected": String(ui.track === t.id), class: ui.track === t.id ? "on" : "",
+    ...[{ id: "path", label: "Path", title: "Recommended order through both tracks" }, { id: "python", label: "Python" }, { id: "ai", label: "AI" }].map(t => h("button", {
+      type: "button", role: "tab", title: t.title || "", "aria-selected": String(ui.track === t.id), class: ui.track === t.id ? "on" : "",
       onclick: () => { setTrack(t.id); const r = location.hash.slice(1); if (r.startsWith("m-") || r.startsWith("project-")) location.hash = "home"; else render(); },
-    }, t.id === "ai" ? "AI for business" : "Python")));
+    }, t.label)));
 }
 
 function renderSidebar() {
@@ -1718,6 +1811,21 @@ function renderSidebar() {
   const link = (href, label, extra) => h("a", { class: "nav-link" + (cur === href ? " active" : ""), href: "#" + href }, h("span", { class: "ntitle" }, label), extra || null);
   const due = dueIds().length;
   nav.append(link("home", "Dashboard"), link("review", "Review", due ? h("span", { class: "nav-badge num" }, due) : null), link("play", "Playground"));
+  if (ui.track === "path") {
+    PATH.forEach((ph, pi) => {
+      nav.append(h("div", { class: "nav-group" }, `${pi + 1} · ${ph.name}`));
+      ph.steps.forEach(step => {
+        const isProj = step.startsWith("project-");
+        const href = isProj ? step : "m-" + step;
+        nav.append(h("a", { class: "nav-link" + (cur === href ? " active" : ""), href: "#" + href },
+          h("span", { class: "nid" }, isProj ? "★" : step),
+          h("span", { class: "ntitle" }, stepLabel(step).replace(/^(Checkpoint Project \d|Capstone|AI Track Capstone):\s*/, (m0) => m0.startsWith("AI") ? "AI capstone: " : m0.startsWith("Cap") ? "Capstone: " : "Project: ")),
+          isProj ? h("span", { class: projectDone(step) ? "check done" : "check" }, projectDone(step) ? "✓" : "") : ring(modProgress(byId[step]), 18)));
+      });
+    });
+    nav.append(h("div", { class: "nav-group" }, "Reference"), link("cheatsheet", "Cheatsheet"), link("notebook", "My notebook"), link("science", "How it's designed"));
+    return;
+  }
   partsIn(ui.track).forEach(([name, ids]) => {
     nav.append(h("div", { class: "nav-group" }, name));
     ids.forEach(id => nav.append(h("a", { class: "nav-link" + (cur === "m-" + id ? " active" : ""), href: "#m-" + id },
@@ -1731,8 +1839,10 @@ function renderSidebar() {
 
 function render() {
   const route = location.hash.slice(1) || "home";
-  if (route.startsWith("m-") && byId[route.slice(2)] && trackOf(route.slice(2)) !== ui.track) setTrack(trackOf(route.slice(2)));
-  if (route.startsWith("project-")) { const pj = C.projects.find(x => "project-" + x.n === route); if (pj && (pj.track || "python") !== ui.track) setTrack(pj.track || "python"); }
+  if (ui.track !== "path") {
+    if (route.startsWith("m-") && byId[route.slice(2)] && trackOf(route.slice(2)) !== ui.track) setTrack(trackOf(route.slice(2)));
+    if (route.startsWith("project-")) { const pj = projectByRoute(route); if (pj && (pj.track || "python") !== ui.track) setTrack(pj.track || "python"); }
+  }
   liveEditors = [];
   const view = $("#view"); view.innerHTML = "";
   let nodes, crumb;
@@ -1742,7 +1852,7 @@ function render() {
   else if (route === "notebook") { nodes = viewNotebook(); crumb = "<b>Notebook</b>"; }
   else if (route === "science") { nodes = viewScience(); crumb = "<b>How it's designed</b>"; }
   else if (route === "cheatsheet") { nodes = viewDoc(C.cheatsheet, "Reference"); crumb = "<b>Cheatsheet</b>"; }
-  else if (route.startsWith("project-")) { const p = C.projects.find(x => "project-" + x.n === route); nodes = p ? viewDoc(p.md, "Project") : viewHome(); crumb = p ? `<b>${esc(p.title)}</b>` : ""; }
+  else if (route.startsWith("project-")) { const p = projectByRoute(route); nodes = p ? viewProject(p) : viewHome(); crumb = p ? `<b>${esc(p.title)}</b>` : ""; }
   else { nodes = viewHome(); crumb = "<b>Dashboard</b>"; }
   view.append(...nodes);
   $("#crumb").innerHTML = crumb;

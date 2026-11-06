@@ -46,6 +46,59 @@ PARTS = [
 ]
 TRACK_ROOTS = [("python", ROOT / "modules"), ("ai", ROOT / "ai")]
 
+# The recommended order: both tracks interleaved, every module after the ones it builds on.
+# Steps are module ids ("05", "A05") or project routes ("project-1").
+PATH = [
+    {"name": "Orientation & first wins", "weeks": "Weeks 1–2", "steps": ["A00", "00", "A01", "A02"],
+     "why": "Start with AI you can use at work tomorrow: early, visible payoffs keep motivation high. "
+            "Python is installed in parallel so coding can start next phase."},
+    {"name": "Use AI safely; write your first code", "weeks": "Weeks 3–5", "steps": ["A03", "01", "02", "03", "04"],
+     "why": "Guardrails come before any work data touches an AI tool. Python basics are spread over three weeks "
+            "so each idea gets practice and review before the next one arrives."},
+    {"name": "Data in Python + AI-assisted analysis", "weeks": "Weeks 6–8", "steps": ["05", "06", "A04", "project-1"],
+     "why": "A04's exercises use lists and dictionaries, so those come first. Project 1 consolidates everything so far, "
+            "and building from memory is retrieval practice at its strongest."},
+    {"name": "Lead early; write real programs", "weeks": "Weeks 9–11", "steps": ["A12", "07", "08", "A05"],
+     "why": "You're already an AI ambassador, so the playbook comes early: start a pilot now and let it run while you learn. "
+            "A05 (Alteryx to Python) needs functions (07) and benefits from error handling (08)."},
+    {"name": "Files, packages and pandas", "weeks": "Weeks 12–14", "steps": ["09", "10", "A06", "project-2"],
+     "why": "pandas runs in a virtual environment (10) and reads files (09). Project 2 is the best consolidation "
+            "of Python Part 2 and a strong portfolio piece."},
+    {"name": "AI from code", "weeks": "Weeks 15–17", "steps": ["11", "14", "A07", "A08"],
+     "why": "Calling AI from Python uses comprehensions (11) and web/API skills (14). Evaluation (A08) follows "
+            "straight away, so you never put unmeasured AI into a workflow."},
+    {"name": "Advanced patterns", "weeks": "Weeks 18–21", "steps": ["12", "13", "A09", "15", "A10", "A11"],
+     "why": "Classes and tests make bigger programs reliable. Decorators (15) are exactly what @mcp.tool() uses, "
+            "so they come right before agents, MCP and Skills."},
+    {"name": "Prove it and position yourself", "weeks": "Weeks 22–26", "steps": ["project-ai", "A13", "project-3"],
+     "why": "The AI capstone ties every skill into portfolio evidence, and the career module turns it into your next role. "
+            "The Python capstone is optional if your AI capstone meets its checklist."},
+]
+
+# Soft prerequisites (the app warns, it never blocks). Used to validate PATH at build time.
+PREREQS = {
+    "01": ["00"], "02": ["01"], "03": ["02"], "04": ["03"], "05": ["04"], "06": ["05"], "07": ["06"],
+    "08": ["07"], "09": ["08"], "10": ["09"], "11": ["10"], "12": ["11"], "13": ["12"], "14": ["10", "11"],
+    "15": ["12"],
+    "A01": ["A00"], "A02": ["A01"], "A03": ["A02"], "A04": ["A03", "06"], "A05": ["A04", "07"],
+    "A06": ["A05", "10"], "A07": ["A01", "08", "11", "14"], "A08": ["A07", "11"], "A09": ["A08"],
+    "A10": ["A07", "08"], "A11": ["A10", "15"], "A12": ["A02", "A03"], "A13": ["A12"],
+}
+
+
+def validate_path(module_ids, project_routes):
+    steps = [s for phase in PATH for s in phase["steps"]]
+    expected = set(module_ids) | set(project_routes)
+    if sorted(steps) != sorted(expected):
+        raise SystemExit(f"PATH must list every module and project exactly once. "
+                         f"Missing: {sorted(expected - set(steps))}, extra/duplicate: "
+                         f"{sorted(x for x in steps if steps.count(x) > 1 or x not in expected)}")
+    position = {s: i for i, s in enumerate(steps)}
+    for mid, reqs in PREREQS.items():
+        for r in reqs:
+            if position[r] > position[mid]:
+                raise SystemExit(f"PATH puts {mid} before its prerequisite {r}")
+
 
 def rewrite_links(md: str) -> str:
     # ../04_loops/lesson.md -> #m-04 ; ../../projects/02_x.md -> #project-2 ; cheatsheet
@@ -152,7 +205,9 @@ def gather():
                          "title": title, "md": md})
 
     cheatsheet = rewrite_links((ROOT / "cheatsheet.md").read_text(encoding="utf-8"))
+    validate_path([m["id"] for m in modules], ["project-" + p["n"] for p in projects])
     return {"modules": modules, "projects": projects, "cheatsheet": cheatsheet, "parts": PARTS, "tracks": TRACKS,
+            "path": PATH, "prereqs": PREREQS,
             "pyodideVersion": PYODIDE_VERSION}
 
 
